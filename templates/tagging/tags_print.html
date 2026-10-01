@@ -1,0 +1,38 @@
+{% load qr %}<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tags {{ order.code }} | WashO</title>
+  {# Stand-alone page (no site menu) so it prints cleanly on label paper. #}
+  <style>
+    body { font-family: system-ui, "Segoe UI", sans-serif; margin: 16px; color: #000; background: #fff; }
+    .toolbar { margin-bottom: 16px; }
+    .sheet { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 10px; }
+    .tag { border: 1px dashed #888; border-radius: 6px; padding: 8px; text-align: center; break-inside: avoid; }
+    .tag svg.qr { width: 110px; height: 110px; }
+    .code { font-weight: 700; font-size: 14px; letter-spacing: .5px; }
+    .meta { font-size: 11px; color: #333; }
+    .issue { font-size: 10px; color: #b00; }
+    @media print { .toolbar { display: none; } body { margin: 0; } }
+  </style>
+</head>
+<body>
+  <div class="toolbar">
+    <button onclick="window.print()">Print tags</button>
+    <span>{{ order.code }} · {{ garments|length }} tag{{ garments|length|pluralize }} · {{ order.store.name }}</span>
+  </div>
+  <div class="sheet">
+    {% for g in garments %}
+      <div class="tag">
+        {% garment_qr g %}
+        <div class="code">{{ g.tag_code }}</div>
+        <div class="meta">{{ g.item.name }} · {{ g.category.name }}{% if order.is_express %} · EXPRESS{% endif %}</div>
+        {% if g.description %}<div class="meta">{{ g.description }}</div>{% endif %}
+        {% if g.has_issue %}<div class="issue">⚠ {{ g.condition_note|truncatechars:40 }}</div>{% endif %}
+        <div class="meta">{{ g.seq }} of {{ garments|length }}</div>
+      </div>
+    {% endfor %}
+  </div>
+</body>
+</html>

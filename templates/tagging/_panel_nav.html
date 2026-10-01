@@ -1,0 +1,19 @@
+{# Small header shared by all staff panel pages #}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+  <div>
+    <h2 class="mb-0"><i class="bi bi-shop text-primary me-2"></i>Staff panel</h2>
+    <div class="small text-muted">
+      {% if user.is_admin_role %}Admin view · all stores{% elif user.store %}{{ user.store.name }}{% endif %}
+    </div>
+  </div>
+  <div class="d-flex flex-wrap gap-2">
+    <form method="get" action="{% url 'tagging:garment_search' %}" class="d-flex gap-1">
+      <input type="search" name="code" class="form-control form-control-sm" placeholder="Tag code, e.g. WO-000002-01" aria-label="Find garment by tag">
+      <button class="btn btn-sm btn-outline-secondary" type="submit" title="Find garment"><i class="bi bi-qr-code-scan"></i></button>
+    </form>
+    <a href="{% url 'tagging:panel' %}" class="btn btn-sm btn-outline-primary"><i class="bi bi-list-task me-1"></i>Orders</a>
+    {% if user.is_admin_role %}
+      <a href="{% url 'tagging:alerts' %}" class="btn btn-sm btn-outline-danger"><i class="bi bi-exclamation-triangle me-1"></i>Mismatch alerts</a>
+    {% endif %}
+  </div>
+</div>

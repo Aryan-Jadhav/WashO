@@ -1,0 +1,118 @@
+{% load money qr %}
+{# Replaced as a whole by HTMX after each garment is tagged (hx-swap="outerHTML"). #}
+<div id="tagging-area">
+  {% if just_tagged %}
+    <div class="alert alert-success py-2 d-flex align-items-center gap-3">
+      <div style="width:56px">{% garment_qr just_tagged %}</div>
+      <div><strong>{{ just_tagged.tag_code }}</strong> tagged: {{ just_tagged.item.name }} ({{ just_tagged.category.name }}).
+        Next garment ready.</div>
+    </div>
+  {% endif %}
+
+  {% if can_tag %}
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-body p-4">
+      <h5 class="mb-3"><i class="bi bi-tag me-2 text-primary"></i>Tag a garment</h5>
+      <form method="post" action="{% url 'tagging:garment_add' order.code %}" enctype="multipart/form-data" novalidate
+            hx-post="{% url 'tagging:garment_add' order.code %}" hx-encoding="multipart/form-data"
+            hx-target="#tagging-area" hx-swap="outerHTML">
+        {% csrf_token %}
+        {% if garment_form.non_field_errors %}
+          <div class="alert alert-danger py-2">{% for e in garment_form.non_field_errors %}<div>{{ e }}</div>{% endfor %}</div>
+        {% endif %}
+        <div class="row g-3">
+          <div class="col-md-7">
+            <label class="form-label" for="{{ garment_form.service_price.id_for_label }}">Service &amp; item <span class="text-danger">*</span></label>
+            {{ garment_form.service_price }}
+            {% for e in garment_form.service_price.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+          </div>
+          <div class="col-md-5">
+            <label class="form-label" for="{{ garment_form.description.id_for_label }}">Colour / brand</label>
+            {{ garment_form.description }}
+          </div>
+          <div class="col-12 d-flex flex-wrap gap-4">
+            <div class="form-check">{{ garment_form.has_stain }}<label class="form-check-label" for="{{ garment_form.has_stain.id_for_label }}">Stain</label></div>
+            <div class="form-check">{{ garment_form.has_damage }}<label class="form-check-label" for="{{ garment_form.has_damage.id_for_label }}">Damage (tear, missing button...)</label></div>
+          </div>
+          <div class="col-md-7">
+            <label class="form-label" for="{{ garment_form.condition_note.id_for_label }}">Stain / damage note</label>
+            {{ garment_form.condition_note }}
+            {% for e in garment_form.condition_note.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+          </div>
+          <div class="col-md-5">
+            <label class="form-label" for="{{ garment_form.photo.id_for_label }}">Photo (optional)</label>
+            {{ garment_form.photo }}
+            {% for e in garment_form.photo.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary mt-3"><i class="bi bi-plus-lg me-1"></i>Tag garment</button>
+      </form>
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-body p-4">
+      <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+        <h5 class="mb-0">Tagged garments <span class="badge text-bg-primary">{{ garments|length }}</span></h5>
+        {% if garments %}<a href="{% url 'tagging:tags_print' order.code %}" target="_blank" class="btn btn-sm btn-outline-secondary"><i class="bi bi-printer me-1"></i>Print tags</a>{% endif %}
+      </div>
+      {% if garments %}
+      <div class="table-responsive">
+        <table class="table table-sm align-middle mb-0">
+          <thead class="table-light"><tr><th style="width:56px">QR</th><th>Tag</th><th>Item</th><th>Condition</th><th class="text-end">Price</th><th></th></tr></thead>
+          <tbody>
+          {% for g in garments %}
+            <tr>
+              <td><div style="width:48px">{% garment_qr g %}</div></td>
+              <td class="small"><strong>{{ g.tag_code }}</strong>{% if g.description %}<div class="text-muted">{{ g.description }}</div>{% endif %}</td>
+              <td class="small">{{ g.item.name }}<div class="text-muted">{{ g.category.name }}</div></td>
+              <td class="small">
+                {% if g.has_stain %}<span class="badge text-bg-warning">Stain</span>{% endif %}
+                {% if g.has_damage %}<span class="badge text-bg-danger">Damage</span>{% endif %}
+                {% if g.has_issue %}<div class="text-muted">{{ g.condition_note }}</div>{% else %}<span class="text-success">OK</span>{% endif %}
+                {% if g.photo %}<a href="{{ g.photo.url }}" target="_blank"><img src="{{ g.photo.url }}" alt="Photo of {{ g.tag_code }}" class="garment-thumb mt-1"></a>{% endif %}
+              </td>
+              <td class="text-end small">{{ g.line_total|rupees }}</td>
+              <td class="text-end text-nowrap">
+                {% if can_edit %}<a href="{% url 'tagging:garment_edit' order.code g.seq %}" class="btn btn-sm btn-link px-1" title="Edit"><i class="bi bi-pencil"></i></a>{% endif %}
+                {% if can_tag %}
+                <form method="post" action="{% url 'tagging:garment_delete' order.code g.seq %}" class="d-inline">
+                  {% csrf_token %}<button type="submit" class="btn btn-sm btn-link text-danger px-1" title="Remove"><i class="bi bi-trash"></i></button>
+                </form>
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+        <p class="text-muted small mb-0">No garments tagged yet.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  {% if can_tag %}
+  <div class="card border-0 shadow-sm mb-4 border-start border-4 border-success">
+    <div class="card-body p-4">
+      <h5>Finish tagging</h5>
+      <p class="small text-muted">
+        {{ garments|length }} garment{{ garments|length|pluralize }} tagged.
+        {% if expected_store_count is not None %}The agent counted <strong>{{ expected_store_count }}</strong> at pickup.{% else %}No pickup count recorded.{% endif %}
+        Finishing saves the store count, makes the <strong>final bill</strong> and moves the order to <em>Tagged</em>.
+      </p>
+      {% if expected_store_count is not None and expected_store_count != garments|length %}
+        <div class="alert alert-warning py-2 small"><i class="bi bi-exclamation-triangle-fill"></i> The counts are different. Re-check the bag before finishing.</div>
+      {% endif %}
+      <form method="post" action="{% url 'tagging:finish_tagging' order.code %}">
+        {% csrf_token %}
+        {% if expected_store_count is not None and expected_store_count != garments|length %}
+          <div class="form-check mb-2">{{ finish_form.confirm_mismatch }}<label class="form-check-label small" for="{{ finish_form.confirm_mismatch.id_for_label }}">{{ finish_form.confirm_mismatch.label }}</label></div>
+        {% endif %}
+        <button type="submit" class="btn btn-success" {% if not garments %}disabled{% endif %}><i class="bi bi-check2-all me-1"></i>Finish tagging</button>
+      </form>
+    </div>
+  </div>
+  {% endif %}
+</div>

@@ -89,3 +89,7 @@ body { background: #fff; color: #1f2937; }
   content: ""; position: absolute; left: -6px; top: 4px; width: 10px; height: 10px;
   border-radius: 50%; background: var(--wo-primary);
 }
+
+/* ---------- Phase 4: tagging ---------- */
+svg.qr { width: 100%; height: auto; display: block; }  /* size comes from the wrapping box */
+.garment-thumb { width: 48px; height: 48px; object-fit: cover; border-radius: .4rem; display: block; }

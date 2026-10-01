@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% load qr %}
+{% block title %}Edit {{ garment.tag_code }}{% endblock %}
+
+{% block content %}
+<div class="container py-5" style="max-width: 720px;">
+  <a href="{% url 'tagging:order' order.code %}" class="small"><i class="bi bi-arrow-left"></i> Back to {{ order.code }}</a>
+  <div class="card border-0 shadow-sm mt-3">
+    <div class="card-body p-4">
+      <div class="d-flex gap-3 align-items-center mb-4">
+        <div style="width:72px">{% garment_qr garment %}</div>
+        <div>
+          <h4 class="mb-0">{{ garment.tag_code }}</h4>
+          <div class="text-muted small">{{ garment.item.name }} · {{ garment.category.name }}</div>
+        </div>
+      </div>
+      <form method="post" enctype="multipart/form-data" novalidate>
+        {% csrf_token %}
+        {% include "partials/_form.html" %}
+        <button type="submit" class="btn btn-primary">Save</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
