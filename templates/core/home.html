@@ -12,11 +12,7 @@
         <h1 class="display-5 fw-bold mb-3">Fresh clothes, delivered.<br><span class="text-accent">Nothing goes missing.</span></h1>
         <p class="lead mb-4">Book a free pickup in under a minute. We wash, dry clean and iron your clothes, then bring them back to your door, counted and checked at every step.</p>
         <div class="d-flex flex-wrap gap-2">
-          {% if user.is_authenticated %}
-            <a href="{% url 'accounts:account' %}" class="btn btn-light btn-lg px-4"><i class="bi bi-calendar-plus me-2"></i>Book a pickup</a>
-          {% else %}
-            <a href="{% url 'accounts:register' %}" class="btn btn-light btn-lg px-4"><i class="bi bi-calendar-plus me-2"></i>Book a pickup</a>
-          {% endif %}
+          <a href="{% url 'orders:book' %}" class="btn btn-light btn-lg px-4"><i class="bi bi-calendar-plus me-2"></i>Book a pickup</a>
           <a href="{% url 'core:services' %}" class="btn btn-outline-light btn-lg px-4">See services</a>
         </div>
       </div>

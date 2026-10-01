@@ -24,6 +24,9 @@
 
       <ul class="navbar-nav align-items-lg-center gap-lg-2">
         {% if user.is_authenticated %}
+          {% if user.is_customer %}
+            <li class="nav-item"><a class="btn btn-primary btn-sm px-3" href="{% url 'orders:book' %}"><i class="bi bi-calendar-plus me-1"></i>Book pickup</a></li>
+          {% endif %}
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
               <i class="bi bi-person-circle me-1"></i>{{ user.first_name|default:user.phone }}
@@ -31,6 +34,10 @@
             <ul class="dropdown-menu dropdown-menu-end">
               <li><span class="dropdown-item-text small text-muted">{{ user.role|default:"No role" }}</span></li>
               <li><a class="dropdown-item" href="{% url 'accounts:account' %}"><i class="bi bi-speedometer2 me-2"></i>My account</a></li>
+              {% if user.is_customer %}
+                <li><a class="dropdown-item" href="{% url 'orders:list' %}"><i class="bi bi-bag me-2"></i>My orders</a></li>
+                <li><a class="dropdown-item" href="{% url 'accounts:address_list' %}"><i class="bi bi-geo-alt me-2"></i>My addresses</a></li>
+              {% endif %}
               {% if user.is_staff %}
                 <li><a class="dropdown-item" href="{% url 'admin:index' %}"><i class="bi bi-gear me-2"></i>Admin site</a></li>
               {% endif %}
