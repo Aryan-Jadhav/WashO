@@ -75,7 +75,8 @@ Open **<http://127.0.0.1:8000>** in a browser. To stop the server, press **Ctrl 
 The admin site is at <http://127.0.0.1:8000/admin/>.
 
 > `migrate` (run by setup.bat) also loads the master data automatically: the 4 roles, FAQs,
-> the full price list (6 services, 35 items) and the 3 Pune stores with their service areas.
+> the full price list (6 services, 35 items), the 3 Pune stores with their service areas,
+> 6 daily pickup time slots, 4 sample coupons and the PL/pgSQL status-history trigger.
 >
 > Each computer has its own database, so users and orders are **not** copied between laptops.
 > From Phase 8, `seed_demo` will fill a new database with the same demo data on any computer.
@@ -121,6 +122,7 @@ WashO/
 ├── accounts/       Custom user (login by mobile number), roles, sign-up, profile
 ├── catalog/        Service categories, items, per-item prices, express surcharge, price list
 ├── stores/         Cities, stores, service areas (pincodes), store locator
+├── orders/         Booking, pickup slots + capacity, coupons, orders, status history (PL/pgSQL trigger)
 ├── templates/      HTML templates (base layout + one folder per app)
 ├── static/         CSS and images
 ├── scripts/        Helper scripts used by setup.bat
