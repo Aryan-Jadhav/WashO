@@ -194,13 +194,25 @@ class Order(models.Model):
     total = models.DecimalField(max_digits=10, decimal_places=2)
     bill_finalised = models.BooleanField(default=False)
 
+    # Delivery agents (set by store staff). Required before Pickup Assigned / Out for Delivery.
+    pickup_agent = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,
+                                     related_name="pickup_jobs")
+    delivery_agent = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,
+                                       related_name="delivery_jobs")
+    delivery_date = models.DateField(null=True, blank=True)
+
     customer_note = models.CharField(max_length=300, blank=True)
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         ordering = ["-created_at"]
-        indexes = [models.Index(fields=["customer", "-created_at"])]
+        indexes = [
+            models.Index(fields=["customer", "-created_at"]),
+            # The agent's "My jobs" page looks orders up by agent + status.
+            models.Index(fields=["pickup_agent", "status"]),
+            models.Index(fields=["delivery_agent", "status"]),
+        ]
         constraints = [
             models.CheckConstraint(condition=Q(status__in=OrderStatus.values), name="order_status_valid"),
             models.CheckConstraint(

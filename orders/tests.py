@@ -32,6 +32,14 @@ def make_address(user, area_name="Kothrud"):
                                   is_default=True)
 
 
+def give_agent(order):
+    """Orders need an agent before Pickup Assigned / Out for Delivery (Phase 5 rule)."""
+    agent = User.objects.create_user("9700000000", "x", store=order.store)
+    agent.groups.add(Group.objects.get(name=Role.AGENT))
+    Order.objects.filter(pk=order.pk).update(pickup_agent=agent, delivery_agent=agent)
+    return agent
+
+
 def price(category_slug, item_name):
     return ServicePrice.objects.select_related("category", "item").get(category__slug=category_slug,
                                                                        item__name=item_name)
@@ -186,6 +194,7 @@ class StatusTransitionTests(TestCase):
         self.order = create_order(customer=self.user, address=make_address(self.user), pickup_date=TOMORROW,
                                   time_slot=TimeSlot.objects.first(),
                                   selected_items=[(price("wash-iron", "Shirt"), 4)])
+        give_agent(self.order)
 
     def test_full_happy_path(self):
         for status in [S.PICKUP_ASSIGNED, S.PICKED_UP, S.AT_STORE, S.TAGGED, S.IN_CLEANING,
@@ -218,6 +227,7 @@ class StatusHistoryTriggerTests(TestCase):
         self.order = create_order(customer=self.user, address=make_address(self.user), pickup_date=TOMORROW,
                                   time_slot=TimeSlot.objects.first(),
                                   selected_items=[(price("wash-iron", "Shirt"), 4)])
+        give_agent(self.order)
 
     def test_booking_and_changes_are_logged_with_user(self):
         change_status(self.order, S.PICKUP_ASSIGNED, by=self.admin, note="Agent Ravi")

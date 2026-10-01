@@ -131,6 +131,11 @@ def change_status(order, new_status, by, note=""):
         raise InvalidTransition("This order can't be cancelled because the clothes have already been picked up.")
     if new_status not in ALLOWED_TRANSITIONS[S(order.status)]:
         raise InvalidTransition(f"Can't change status from {order.get_status_display()} to {new_status.label}.")
+    # Someone must be responsible for the trip before it starts.
+    if new_status == S.PICKUP_ASSIGNED and not order.pickup_agent_id:
+        raise InvalidTransition("Assign a pickup agent first (Staff panel → order → Assign pickup agent).")
+    if new_status == S.OUT_FOR_DELIVERY and not order.delivery_agent_id:
+        raise InvalidTransition("Assign a delivery agent first (Staff panel → order → Assign delivery agent).")
 
     _set_audit_context(by, note)
     order.status = new_status
