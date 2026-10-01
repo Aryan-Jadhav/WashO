@@ -14,3 +14,10 @@ psycopg-binary==3.3.6
 
 # Reads settings from the .env file
 python-decouple==3.8
+
+# QR codes on garment tags (drawn as SVG); colorama is its Windows-only helper
+qrcode==8.2
+colorama==0.4.6 ; platform_system == "Windows"
+
+# Image handling for damage/stain photos (Django ImageField needs it)
+pillow==12.3.0

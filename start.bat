@@ -39,7 +39,7 @@ if not errorlevel 1 (
 )
 
 REM --- 3. Is PostgreSQL running and reachable? -------------------------
-echo [1/3] Checking the database ...
+echo [1/4] Checking the database ...
 "%PY%" scripts\check_db.py >nul 2>&1
 if errorlevel 1 (
     echo.
@@ -57,16 +57,26 @@ if errorlevel 1 (
 )
 echo   Database OK.
 
-REM --- 4. Apply any new database changes ------------------------------
-echo [2/3] Applying database updates ...
+REM --- 4. Install any packages added since last time ----------------------
+REM (Needs internet only when requirements.txt has something new.)
+echo [2/4] Checking Python packages ...
+"%PY%" -m pip install -r requirements.txt --quiet --disable-pip-version-check
+if errorlevel 1 (
+    echo   ERROR: Could not install the packages in requirements.txt.
+    echo   Check your internet connection, or run setup.bat again.
+    goto :fail
+)
+
+REM --- 5. Apply any new database changes ------------------------------
+echo [3/4] Applying database updates ...
 "%PY%" manage.py migrate --noinput
 if errorlevel 1 (
     echo   ERROR: Database update ^(migrate^) failed. See the message above.
     goto :fail
 )
 
-REM --- 5. Open the browser once the server answers, then run the server --
-echo [3/3] Starting the website ...
+REM --- 6. Open the browser once the server answers, then run the server --
+echo [4/4] Starting the website ...
 start "" /b "%PY%" scripts\open_browser.py "%URL%"
 
 echo.
