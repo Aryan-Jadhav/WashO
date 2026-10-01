@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+{% load money %}
+{% block title %}Admin dashboard{% endblock %}
+
+{% block content %}
+<div class="container py-4 py-lg-5">
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+    <div>
+      <h2 class="mb-0"><i class="bi bi-speedometer2 text-primary me-2"></i>Dashboard</h2>
+      <div class="small text-muted">{{ today|date:"l, d M Y" }} · {% if store %}{{ store.name }}{% else %}All stores{% endif %}</div>
+    </div>
+    {# Filter row: one control, above all charts #}
+    <form method="get" class="d-flex gap-2">
+      <select name="store" class="form-select form-select-sm" onchange="this.form.submit()" aria-label="Store">
+        <option value="">All stores</option>
+        {% for s in stores %}<option value="{{ s.slug }}" {% if store == s %}selected{% endif %}>{{ s.name }}</option>{% endfor %}
+      </select>
+      <noscript><button class="btn btn-sm btn-primary">Apply</button></noscript>
+    </form>
+  </div>
+
+  <!-- KPI tiles: single headline numbers, no chart needed -->
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-lg-2"><div class="kpi"><div class="kpi-label">Bookings today</div><div class="kpi-value">{{ kpis.bookings_today }}</div></div></div>
+    <div class="col-6 col-lg-2"><div class="kpi"><div class="kpi-label">Open orders</div><div class="kpi-value">{{ kpis.open_orders }}</div></div></div>
+    <div class="col-6 col-lg-2"><div class="kpi"><div class="kpi-label">Delivered today</div><div class="kpi-value">{{ kpis.delivered_today }}</div></div></div>
+    <div class="col-6 col-lg-2"><div class="kpi"><div class="kpi-label">Revenue today</div><div class="kpi-value">{{ kpis.revenue_today|rupees|default:"₹0" }}</div></div></div>
+    <div class="col-6 col-lg-2"><div class="kpi"><div class="kpi-label">Revenue this month</div><div class="kpi-value">{{ kpis.revenue_month|rupees|default:"₹0" }}</div>
+      <div class="kpi-sub">Avg order {{ kpis.avg_order_value|rupees }}</div></div></div>
+    <div class="col-6 col-lg-2"><a href="{% url 'tagging:alerts' %}" class="kpi d-block text-decoration-none {% if kpis.open_alerts %}kpi-alert{% endif %}">
+      <div class="kpi-label">{% if kpis.open_alerts %}<i class="bi bi-exclamation-triangle-fill"></i> {% endif %}Mismatch alerts</div>
+      <div class="kpi-value">{{ kpis.open_alerts }}</div><div class="kpi-sub">open · review</div></a></div>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-8">
+      <div class="card border-0 shadow-sm h-100"><div class="card-body p-4">
+        <h5 class="mb-1">Daily revenue</h5>
+        <p class="small text-muted">Cash &amp; UPI collected on delivery, last 30 days (from the PostgreSQL view)</p>
+        <div class="chart-box"><canvas id="chartDaily" aria-label="Daily revenue bar chart" role="img"></canvas></div>
+        <details class="mt-2 small"><summary>Show as table</summary>
+          <table class="table table-sm mt-2 mb-0"><tbody>{% for d in daily %}{% if d.value %}<tr><td>{{ d.label }}</td><td class="text-end">{{ d.value|rupees }}</td></tr>{% endif %}{% endfor %}</tbody></table>
+        </details>
+      </div></div>
+    </div>
+    <div class="col-lg-4">
+      <div class="card border-0 shadow-sm h-100"><div class="card-body p-4">
+        <h5 class="mb-1">Orders by status</h5>
+        <p class="small text-muted">All orders, in lifecycle order</p>
+        <div class="chart-box chart-box-tall"><canvas id="chartStatus" aria-label="Orders by status bar chart" role="img"></canvas></div>
+        <details class="mt-2 small"><summary>Show as table</summary>
+          <table class="table table-sm mt-2 mb-0"><tbody>{% for s in by_status %}<tr><td>{{ s.label }}</td><td class="text-end">{{ s.value }}</td></tr>{% endfor %}</tbody></table>
+        </details>
+      </div></div>
+    </div>
+
+    <div class="col-lg-8">
+      <div class="card border-0 shadow-sm h-100"><div class="card-body p-4">
+        <h5 class="mb-1">Monthly revenue</h5>
+        <p class="small text-muted">Last 12 months</p>
+        <div class="chart-box"><canvas id="chartMonthly" aria-label="Monthly revenue bar chart" role="img"></canvas></div>
+        <details class="mt-2 small"><summary>Show as table</summary>
+          <table class="table table-sm mt-2 mb-0"><tbody>{% for m in monthly %}<tr><td>{{ m.label }}</td><td class="text-end">{{ m.value|rupees }}</td></tr>{% endfor %}</tbody></table>
+        </details>
+      </div></div>
+    </div>
+    <div class="col-lg-4">
+      <div class="card border-0 shadow-sm h-100"><div class="card-body p-4">
+        <h5 class="mb-1">Top services</h5>
+        <p class="small text-muted">By garments cleaned</p>
+        <div class="chart-box"><canvas id="chartServices" aria-label="Top services bar chart" role="img"></canvas></div>
+        <table class="table table-sm small mt-2 mb-0">
+          <thead><tr><th>Service</th><th class="text-end">Pieces</th><th class="text-end">Amount</th></tr></thead>
+          <tbody>{% for r in top_services %}<tr><td>{{ r.name }}</td><td class="text-end">{{ r.garments }}</td><td class="text-end">{{ r.amount|rupees }}</td></tr>
+          {% empty %}<tr><td colspan="3" class="text-muted">No garments tagged yet.</td></tr>{% endfor %}</tbody>
+        </table>
+      </div></div>
+    </div>
+
+    {% if store_rows %}
+    <div class="col-lg-8">
+      <div class="card border-0 shadow-sm"><div class="card-body p-4">
+        <h5 class="mb-3">Stores</h5>
+        <div class="table-responsive"><table class="table align-middle mb-0">
+          <thead class="table-light"><tr><th>Store</th><th class="text-end">Open orders</th><th class="text-end">Revenue this month</th><th class="text-end">Open alerts</th></tr></thead>
+          <tbody>{% for r in store_rows %}
+            <tr><td><a href="?store={{ r.store.slug }}">{{ r.store.name }}</a></td><td class="text-end">{{ r.open_orders }}</td>
+                <td class="text-end">{{ r.revenue_month|rupees|default:"₹0" }}</td>
+                <td class="text-end">{% if r.open_alerts %}<span class="badge text-bg-danger"><i class="bi bi-exclamation-triangle-fill"></i> {{ r.open_alerts }}</span>{% else %}0{% endif %}</td></tr>
+          {% endfor %}</tbody>
+        </table></div>
+      </div></div>
+    </div>
+    {% endif %}
+    <div class="col-lg-4">
+      <div class="card border-0 shadow-sm"><div class="card-body p-4">
+        <h5 class="mb-3">Latest open alerts</h5>
+        {% for a in latest_alerts %}
+          <div class="small border-bottom py-2"><a href="{% url 'tagging:order' a.order.code %}">{{ a.order.code }}</a> · {{ a.order.store.name }}<br>
+            {{ a.get_checkpoint_display }}: expected {{ a.expected_count }}, counted {{ a.actual_count }}</div>
+        {% empty %}<p class="small text-muted mb-0">No open alerts.</p>{% endfor %}
+        <a href="{% url 'tagging:alerts' %}" class="btn btn-sm btn-outline-danger mt-3">All alerts</a>
+      </div></div>
+    </div>
+  </div>
+
+  <div class="d-flex flex-wrap gap-2 mt-4">
+    <a href="{% url 'tagging:panel' %}" class="btn btn-outline-primary"><i class="bi bi-shop me-1"></i>Staff panel</a>
+    <a href="{% url 'admin:index' %}" class="btn btn-outline-secondary"><i class="bi bi-gear me-1"></i>Admin site (master data)</a>
+  </div>
+</div>
+
+{{ chart_data|json_script:"chart-data" }}
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+  // All charts are single-series bars in the brand blue: one colour, no legend needed
+  // (the card title names the series). Hover shows the exact value.
+  (function () {
+    if (!window.Chart) return;  // offline: the "Show as table" views still work
+    const data = JSON.parse(document.getElementById("chart-data").textContent);
+    const BLUE = "#0d6efd", GRID = "rgba(0,0,0,.06)", INK = "#6c757d";
+    const inr = v => "₹" + Number(v).toLocaleString("en-IN", {maximumFractionDigits: 0});
+    Chart.defaults.font.family = getComputedStyle(document.body).fontFamily;
+    Chart.defaults.color = INK;
+
+    function bar(id, rows, opts) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      new Chart(el, {
+        type: "bar",
+        data: {labels: rows.map(r => r.label),
+               datasets: [{data: rows.map(r => r.value), backgroundColor: BLUE,
+                           borderRadius: 4, borderSkipped: "start", maxBarThickness: 28}]},
+        options: {
+          indexAxis: opts.horizontal ? "y" : "x",
+          maintainAspectRatio: false,
+          plugins: {legend: {display: false},
+                    tooltip: {callbacks: {label: c => opts.money ? inr(c.raw) : c.raw + " " + (opts.unit || "")}}},
+          scales: {
+            [opts.horizontal ? "x" : "y"]: {beginAtZero: true, grid: {color: GRID}, border: {display: false},
+                                            ticks: {precision: 0, callback: v => opts.money ? inr(v) : v}},
+            [opts.horizontal ? "y" : "x"]: {grid: {display: false}, ticks: {autoSkip: true, maxRotation: 0}},
+          },
+        },
+      });
+    }
+    bar("chartDaily", data.daily, {money: true});
+    bar("chartMonthly", data.monthly, {money: true});
+    bar("chartStatus", data.by_status, {horizontal: true, unit: "orders"});
+    bar("chartServices", data.top_services, {horizontal: true, unit: "pieces"});
+  })();
+</script>
+{% endblock %}
