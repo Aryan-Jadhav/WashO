@@ -83,12 +83,13 @@ and code must carry short WHY-comments that help in the viva.
   all diagrams, data dictionary, test case table, screenshot list, viva prep (40 Q&A).
 
 ## 6. Status
-- [ ] Phase 0  - [ ] Phase 1  - [ ] Phase 2  - [ ] Phase 3  - [ ] Phase 4
+- [x] Phase 0  - [ ] Phase 1  - [ ] Phase 2  - [ ] Phase 3  - [ ] Phase 4
 - [ ] Phase 5  - [ ] Phase 6  - [ ] Phase 7  - [ ] Phase 8  - [ ] Phase 9
 
 ## 7. Common commands (filled in as we go)
 ```
-venv\Scripts\activate
+venv\Scripts\activate          # venv uses Python 3.14
+python scripts\check_db.py       # verify DB connection + permissions
 python manage.py runserver
 python manage.py test
 python manage.py seed_demo
