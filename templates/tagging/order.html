@@ -27,8 +27,12 @@
       <strong>Count mismatch {{ a.get_checkpoint_display|lower }}:</strong> expected {{ a.expected_count }}, counted {{ a.actual_count }}. Admin has been alerted.</div>
   {% endif %}{% endfor %}
 
-  {% if order.status == "booked" or order.status == "pickup_assigned" %}
-    <div class="alert alert-info small"><i class="bi bi-truck me-1"></i>Waiting for the delivery agent to pick up the clothes.</div>
+  {% if order.status == "booked" %}
+    <div class="alert alert-info small"><i class="bi bi-person-plus me-1"></i>New booking: assign a pickup agent (right side).</div>
+  {% elif order.status == "pickup_assigned" %}
+    <div class="alert alert-info small"><i class="bi bi-truck me-1"></i>Waiting for the agent to pick up the clothes.</div>
+  {% elif order.status == "ready" and not order.delivery_agent %}
+    <div class="alert alert-info small"><i class="bi bi-person-plus me-1"></i>Ready: assign a delivery agent (right side).</div>
   {% endif %}
 
   <div class="row g-4">
@@ -37,6 +41,34 @@
     </div>
 
     <div class="col-lg-4">
+      <div class="card border-0 shadow-sm mb-4 {% if pickup_form and not order.pickup_agent or delivery_form and not order.delivery_agent %}border-start border-4 border-primary{% endif %}">
+        <div class="card-body p-4">
+          <h5 class="mb-3"><i class="bi bi-truck me-2 text-primary"></i>Agents</h5>
+          <p class="small mb-1">Pickup: <strong>{% if order.pickup_agent %}{{ order.pickup_agent.get_full_name|default:order.pickup_agent.phone }}{% else %}not assigned{% endif %}</strong></p>
+          <p class="small mb-3">Delivery: <strong>{% if order.delivery_agent %}{{ order.delivery_agent.get_full_name|default:order.delivery_agent.phone }} · {{ order.delivery_date|date:"D d M" }}{% else %}not assigned{% endif %}</strong></p>
+
+          {% if pickup_form %}
+            <form method="post" action="{% url 'delivery:assign_pickup' order.code %}">
+              {% csrf_token %}
+              <label class="form-label small" for="{{ pickup_form.agent.id_for_label }}">{% if order.pickup_agent %}Change pickup agent{% else %}Assign pickup agent{% endif %}</label>
+              <div class="input-group input-group-sm">
+                {{ pickup_form.agent }}
+                <button type="submit" class="btn btn-primary">{% if order.pickup_agent %}Change{% else %}Assign{% endif %}</button>
+              </div>
+            </form>
+          {% endif %}
+
+          {% if delivery_form %}
+            <form method="post" action="{% url 'delivery:assign_delivery' order.code %}" class="row g-2">
+              {% csrf_token %}
+              <div class="col-12"><label class="form-label small mb-0" for="{{ delivery_form.agent.id_for_label }}">{% if order.delivery_agent %}Change delivery{% else %}Assign delivery agent{% endif %}</label>{{ delivery_form.agent }}</div>
+              <div class="col-7">{{ delivery_form.delivery_date }}</div>
+              <div class="col-5 d-grid"><button type="submit" class="btn btn-sm btn-primary">{% if order.delivery_agent %}Change{% else %}Assign{% endif %}</button></div>
+            </form>
+          {% endif %}
+        </div>
+      </div>
+
       <div class="card border-0 shadow-sm mb-4">
         <div class="card-body p-4">
           <h5 class="mb-3"><i class="bi bi-123 me-2 text-primary"></i>Garment counts</h5>

@@ -57,7 +57,11 @@
             <td>{{ o.customer.get_full_name|default:o.customer.phone }}<div class="small text-muted">{{ o.customer.phone }}</div></td>
             <td class="d-none d-md-table-cell small">{{ o.pickup_slot.date|date:"D d M" }}<br>{{ o.pickup_slot.time_slot }}</td>
             <td class="text-center">{{ o.garment_count|default:"–" }}</td>
-            <td><span class="badge text-bg-{{ o.status|status_colour }}">{{ o.get_status_display }}</span></td>
+            <td><span class="badge text-bg-{{ o.status|status_colour }}">{{ o.get_status_display }}</span>
+              {% if o.status == "booked" %}<div class="small text-danger">Assign agent</div>
+              {% elif o.status == "ready" and not o.delivery_agent %}<div class="small text-danger">Assign delivery</div>
+              {% elif o.status == "pickup_assigned" %}<div class="small text-muted">{{ o.pickup_agent.first_name }}</div>
+              {% elif o.status == "ready" or o.status == "out_for_delivery" %}<div class="small text-muted">{{ o.delivery_agent.first_name }}</div>{% endif %}</td>
             <td class="text-end"><a href="{% url 'tagging:order' o.code %}" class="btn btn-sm btn-outline-primary">Open</a></td>
           </tr>
         {% empty %}

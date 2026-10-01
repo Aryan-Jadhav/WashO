@@ -54,6 +54,11 @@ class TaggingTestBase(TestCase):
                                   time_slot=TimeSlot.objects.first(), selected_items=[(self.shirt, 3)])
 
     def move_to(self, *statuses):
+        if not self.order.pickup_agent_id:  # Phase 5: trips need an agent
+            agent = User.objects.filter(phone="9700000000").first() or \
+                user_with_role("9700000000", Role.AGENT, store=self.store)
+            Order.objects.filter(pk=self.order.pk).update(pickup_agent=agent, delivery_agent=agent)
+            self.order.refresh_from_db()
         for s in statuses:
             self.order = change_status(self.order, s, by=self.admin)
 

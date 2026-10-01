@@ -6,6 +6,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
 from accounts.permissions import role_required
+from delivery.forms import AssignDeliveryForm, AssignPickupForm
 from accounts.roles import Role
 from core.htmx import is_htmx, vary_on_htmx
 from orders.models import Order
@@ -32,7 +33,7 @@ TABS = {
 
 def visible_orders(user):
     """Admin sees every store; staff see only their own store. (Role check on every view.)"""
-    qs = Order.objects.select_related("customer", "store", "pickup_slot__time_slot")
+    qs = Order.objects.select_related("customer", "store", "pickup_slot__time_slot", "pickup_agent", "delivery_agent")
     if user.has_role(Role.ADMIN):
         return qs
     if user.store_id:
@@ -92,6 +93,11 @@ def _order_context(request, order, garment_form=None, finish_form=None):
         "finish_form": finish_form or FinishTaggingForm(),
         "step": STAFF_STEPS.get(S(order.status)),
         "can_tag": order.status == S.AT_STORE,
+        # Agent assignment (Phase 5): pickup before collection, delivery once Ready.
+        "pickup_form": AssignPickupForm(order=order, initial={"agent": order.pickup_agent})
+        if order.status in (S.BOOKED, S.PICKUP_ASSIGNED) else None,
+        "delivery_form": AssignDeliveryForm(order=order, initial={"agent": order.delivery_agent})
+        if order.status == S.READY else None,
         "can_edit": order.status in EDITABLE_STATUSES,
     }
 
