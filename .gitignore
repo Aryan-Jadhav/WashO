@@ -1,19 +1,40 @@
-# Python
+# ---------------------------------------------------------------
+# Files Git must never save (they are personal, secret or rebuilt).
+# ---------------------------------------------------------------
+
+# Python: compiled files and the virtual environment (setup.bat rebuilds venv)
 __pycache__/
 *.py[cod]
 venv/
 .venv/
+env/
 
-# Secrets — never commit
+# Secrets - the real settings file with your DB password and SECRET_KEY.
+# Only the template .env.example is saved.
 .env
+.env.*
+!.env.example
 
-# Django
+# Django: uploaded photos, collected static files, local databases, logs
 /media/
 /staticfiles/
+*.sqlite3
 *.log
 
-# Editors / OS
+# Test / coverage leftovers
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Node tools (e.g. if mermaid-cli is installed in the project by mistake)
+node_modules/
+
+# Editors and operating system files
 .vscode/
 .idea/
+*.swp
+*.bak
 Thumbs.db
+Desktop.ini
 .DS_Store
+~$*
