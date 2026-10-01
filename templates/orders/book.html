@@ -6,11 +6,11 @@
   <h2 class="mb-1">Book a pickup</h2>
   <p class="text-muted mb-4">Give us an approximate count. We'll count every garment at pickup and make the final bill at the store.</p>
 
-  {#
+  {% comment %}
     The whole page is ONE normal form (works without JavaScript).
     HTMX extras: on any change it posts to book_estimate and swaps in the new price summary,
     and the slot list reloads when the date or address changes.
-  #}
+  {% endcomment %}
   <form method="post" id="booking-form" novalidate
         hx-post="{% url 'orders:book_estimate' %}" hx-target="#estimate"
         hx-trigger="change, input delay:500ms">

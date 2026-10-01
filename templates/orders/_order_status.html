@@ -1,8 +1,8 @@
 {% load order_tags %}
-{#
+{% comment %}
   Live status: while the order is open, HTMX re-fetches this block every 15 seconds
   and replaces it (hx-swap="outerHTML"). No page reload, no custom JavaScript.
-#}
+{% endcomment %}
 <div id="order-status" class="card border-0 shadow-sm mb-4"
      {% if order.is_open %}hx-get="{% url 'orders:status_partial' order.code %}" hx-trigger="every 15s" hx-swap="outerHTML"{% endif %}>
   <div class="card-body p-4">
