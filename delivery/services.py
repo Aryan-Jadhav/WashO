@@ -6,6 +6,7 @@ from django.utils import timezone
 from accounts.roles import Role
 from orders.models import Order
 from orders.services import InvalidTransition, change_status
+from payments.services import PaymentError, amount_due, record_collection
 from tagging.models import CountCheck
 from tagging.services import expected_count, record_count
 
@@ -96,9 +97,12 @@ def start_delivery(order, agent):
 
 
 @transaction.atomic
-def confirm_delivery(order, agent, count, confirm_mismatch=False, note=""):
-    """At the customer's door: count the garments handed over. A different count needs confirmation
-    and raises a mismatch alert for admin."""
+def confirm_delivery(order, agent, count, confirm_mismatch=False, note="", payment_method=None, reference=""):
+    """At the customer's door: count the garments handed over and collect the bill (Cash on Delivery).
+
+    A different count needs confirmation and raises a mismatch alert for admin. Count, payment and
+    'Delivered' are saved in ONE transaction - all of them, or none.
+    """
     order = _locked(order)
     _check_own_job(order, agent, "delivery_agent")
     if order.status != S.OUT_FOR_DELIVERY:
@@ -109,7 +113,15 @@ def confirm_delivery(order, agent, count, confirm_mismatch=False, note=""):
             f"The store tagged {expected} garments but you counted {count}. Count again with the customer; "
             "if it is really different, tick the confirmation box (admin will be alerted)."
         )
+    due = amount_due(order)
+    if due > 0 and not payment_method:
+        raise DeliveryError(f"Collect ₹{due} from the customer (cash or UPI) and tick 'Payment collected'.")
     record_count(order, CP.DELIVERY, count, agent, note)
+    if due > 0:
+        try:
+            record_collection(order, agent, payment_method, reference)
+        except PaymentError as e:
+            raise DeliveryError(str(e))
     return change_status(order, S.DELIVERED, agent, note=f"Delivered {count} garments" + (f" – {note}" if note else ""))
 
 

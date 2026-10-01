@@ -108,7 +108,7 @@ class AgentJobTests(DeliveryTestBase):
         self.to_ready()
         assign_delivery_agent(self.order, self.agent, TODAY, self.staff)
         start_delivery(self.order, self.agent)
-        order = confirm_delivery(self.order, self.agent, 3)
+        order = confirm_delivery(self.order, self.agent, 3, payment_method="cash")
         self.assertEqual(order.status, S.DELIVERED)
         self.assertFalse(MismatchAlert.objects.filter(checkpoint=CP.DELIVERY).exists())
 
@@ -117,10 +117,10 @@ class AgentJobTests(DeliveryTestBase):
         assign_delivery_agent(self.order, self.agent, TODAY, self.staff)
         start_delivery(self.order, self.agent)
         with self.assertRaisesMessage(DeliveryError, "store tagged 3 garments but you counted 2"):
-            confirm_delivery(self.order, self.agent, 2)
+            confirm_delivery(self.order, self.agent, 2, payment_method="cash")
         self.order.refresh_from_db()
         self.assertEqual(self.order.status, S.OUT_FOR_DELIVERY)  # nothing changed
-        confirm_delivery(self.order, self.agent, 2, confirm_mismatch=True)
+        confirm_delivery(self.order, self.agent, 2, confirm_mismatch=True, payment_method="upi")
         alert = MismatchAlert.objects.get(checkpoint=CP.DELIVERY)
         self.assertEqual((alert.expected_count, alert.actual_count), (3, 2))
 
@@ -170,7 +170,8 @@ class AgentPanelViewTests(DeliveryTestBase):
         self.client.force_login(self.agent)
         self.assertContains(self.client.get(reverse("delivery:my_jobs")), self.order.code)
         self.client.post(reverse("delivery:job_start_delivery", args=[self.order.code]))
-        self.client.post(reverse("delivery:job_deliver", args=[self.order.code]), {"count": 3})
+        self.client.post(reverse("delivery:job_deliver", args=[self.order.code]),
+                         {"count": 3, "payment_method": "cash", "payment_collected": "on"})
         self.order.refresh_from_db()
         self.assertEqual(self.order.status, S.DELIVERED)
         self.assertEqual(list(self.order.count_checks.values_list("checkpoint", "count")),

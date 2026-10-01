@@ -1,6 +1,7 @@
 import datetime
 
 from django.contrib import messages
+from django.db.models import Count, Sum
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
@@ -13,6 +14,9 @@ from orders.services import InvalidTransition
 from tagging.models import CountCheck
 from tagging.services import expected_count
 from tagging.views import PANEL_ROLES, visible_orders
+
+from payments.models import Payment
+from payments.services import amount_due
 
 from .forms import AssignDeliveryForm, AssignPickupForm, DeliveryCountForm, PickupCountForm
 from .services import (DeliveryError, agent_jobs, assign_delivery_agent, assign_pickup_agent, confirm_delivery,
@@ -72,8 +76,12 @@ def my_jobs(request):
         history__changed_by=request.user, history__to_status__in=[S.PICKED_UP, S.DELIVERED],
         history__changed_at__date=today,
     ).distinct().count()
+    # For handing over the day's cash at the store.
+    collected = Payment.objects.filter(collected_by=request.user, collected_at__date=today) \
+        .values("method").annotate(total=Sum("amount"), n=Count("id"))
     return render(request, "delivery/my_jobs.html", {
         "pickups": pickups, "deliveries": deliveries, "to_store": to_store, "done_today": done_today,
+        "collected": {row["method"]: row for row in collected},
         "day": day, "today": today,
         "prev_day": day - datetime.timedelta(days=1), "next_day": day + datetime.timedelta(days=1),
         "no_store": not request.user.store_id,
@@ -99,7 +107,8 @@ def job(request, code, pickup_form=None, delivery_form=None):
         "is_pickup": order.pickup_agent_id == request.user.pk and order.status == S.PICKUP_ASSIGNED,
         "is_delivery": order.delivery_agent_id == request.user.pk and order.status in (S.READY, S.OUT_FOR_DELIVERY),
         "pickup_form": pickup_form or PickupCountForm(),
-        "delivery_form": delivery_form or DeliveryCountForm(),
+        "delivery_form": delivery_form or DeliveryCountForm(amount_due=amount_due(order)),
+        "amount_due": amount_due(order),
         "store_count": counts.get(CP.STORE),
         "pickup_count": counts.get(CP.PICKUP),
         "expected_delivery": expected_count(order, CP.DELIVERY),
@@ -138,11 +147,12 @@ def job_start_delivery(request, code):
 @require_POST
 def job_deliver(request, code):
     order = _my_order(request, code)
-    form = DeliveryCountForm(request.POST)
+    form = DeliveryCountForm(request.POST, amount_due=amount_due(order))
     if form.is_valid():
         d = form.cleaned_data
         try:
-            confirm_delivery(order, request.user, d["count"], d["confirm_mismatch"], d["note"])
+            confirm_delivery(order, request.user, d["count"], d["confirm_mismatch"], d["note"],
+                             payment_method=d["payment_method"] or None, reference=d["reference"])
             messages.success(request, f"{order.code} delivered. Thank you!")
             if order.mismatch_alerts.filter(checkpoint=CP.DELIVERY, status="open").exists():
                 messages.warning(request, "The count was different from the store count. Admin has been alerted.")
