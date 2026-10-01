@@ -1,156 +1,153 @@
-# CLAUDE.md — Project Guide
+# CLAUDE.md: WashO handover report
 
-> Brand name: **WashO** (original brand; working folder: `WashO`).
-> Never use Tumbledry's name, logo, images or copied text anywhere in code, templates, seed data or docs.
+> Read this first. It is the single source of truth for any Claude session on this project.
+> Brand: **WashO** (original). Never use Tumbledry's name, logo, images or copied text anywhere.
 
-## 1. Project summary
-T.Y. B.Sc. Computer Science final-year project (SPPU, NEP 2020).
-An online laundry & dry-cleaning platform: customers book a pickup, a delivery agent collects
-clothes, store staff tag every garment individually (QR code), clean them, and the agent
-delivers them back. Garment counts are checked at pickup, store and delivery; any mismatch
-raises an admin alert (our key differentiator — solves the "missing clothes" problem).
+## 1. What this is
+T.Y. B.Sc. Computer Science final-year project (Savitribai Phule Pune University, NEP 2020).
+WashO is an online laundry & dry-cleaning platform. Customers book a doorstep pickup. A delivery
+agent collects the clothes, store staff **tag every garment individually** (unique code + QR, with a
+stain/damage note and photo), clean them, and the agent delivers them back and collects **Cash on
+Delivery**. Garment counts are checked at **pickup → store → delivery**; any difference raises a
+**mismatch alert** for admin. This is the project's key differentiator: it solves the "missing clothes" problem.
 
-The student does not write code. Every setup step must be explained in plain, simple words,
-and code must carry short WHY-comments that help in the viva.
+**The student does not write code.** Explain every step in plain, simple words (short sentences,
+numbered steps, tell them exactly what to click or type). Code carries short WHY-comments for the viva.
+Stop after each piece of work, then say what was built, how to run it and what to test in the browser.
 
-## 2. Tech stack (fixed — ask before changing)
-| Layer | Choice |
+## 2. Current status (as of 2026-10-02): ALL PHASES COMPLETE
+| Phase | Status |
 |---|---|
-| Language | Python 3.12+ (machine has 3.14 and 3.11; use 3.14 for the venv) |
-| Framework | Django **5.2 LTS** (supported until April 2028) — confirmed by user |
-| Database | PostgreSQL 17 via `psycopg[binary]` (psycopg 3) |
-| Frontend | Django templates + Bootstrap 5 (CDN), Bootstrap Icons |
-| Dynamic bits | HTMX (slot loading, status refresh); plain `fetch` only where HTMX doesn't fit |
-| Charts | Chart.js (CDN) |
-| Config | `.env` via `python-decouple`; `.env.example` committed, `.env` git-ignored |
-| Payments | **Cash on Delivery only** (cash or UPI to the agent). Razorpay dropped by user decision (2026-10-01). |
-| PDF invoices | `reportlab` (pure Python; xhtml2pdf dropped: heavy deps on Py 3.14). PDFs use `Rs.` (no ₹ glyph in base fonts) |
-| QR codes | `qrcode` + Pillow |
-| Email | console backend in development |
-| Tests | Django `TestCase` (`python manage.py test`) |
+| 0 Environment | ✅ PostgreSQL 18.3, DB `washo`, user `washo_user` (owner + CREATEDB), venv on Python 3.14 |
+| 1 Skeleton, custom user, roles, public pages | ✅ |
+| 2 Catalog, price list, store locator | ✅ |
+| 3 Addresses, booking, slots, coupons, orders, status history | ✅ |
+| 4 Staff panel, garment tagging, QR, photos, counts, mismatch alerts | ✅ |
+| 5 Delivery agent panel | ✅ |
+| 6 Cash on Delivery, PDF invoices, email notifications | ✅ (Razorpay **dropped**: user decision) |
+| 7 Admin dashboard + PostgreSQL revenue view | ✅ (complaints & reviews **dropped** → Future Enhancements; user decision) |
+| 8 Tests, `seed_demo`, README | ✅ 138 tests, all passing |
+| 9 Academic docs in `docs/` | ✅ synopsis, report, 13 Mermaid diagrams + PNGs, data dictionary, test cases, screenshot list, viva Q&A |
 
-## 3. Conventions
-- Custom user model (`accounts.User`) from day one: `phone` required + unique, `email` optional.
-  Login with phone number.
-- Roles = Django **Groups**: `Customer`, `Store Staff`, `Delivery Agent`, `Admin`.
-  Every view is protected by a role check (mixin/decorator in `accounts/permissions.py`).
-- Apps (planned): `core` (public pages), `accounts`, `catalog`, `stores`, `orders`
-  (booking, slots, coupons, status history), `tagging`, `delivery`, `payments`, `dashboard`,
-  `support` (complaints, reviews).
-- Business rules live in model methods / `services.py`, not in views — so they are testable.
-- Money: `DecimalField(max_digits=10, decimal_places=2)`, never float. Currency INR (₹).
-- Order status changes go through ONE function (`orders.services.change_status`) that validates
-  the allowed transition, writes `OrderStatusHistory` (who + when) and sends the email.
-- Server-side validation on every form (Django forms/ModelForms). CSRF always on.
-- DB: 3NF, FKs with explicit `on_delete`, `CheckConstraint`/`UniqueConstraint`, indexes on
-  frequently searched fields (phone, pincode, order code, status, dates, tag code).
-- PostgreSQL-specific feature for viva: a SQL **VIEW** for revenue reporting and a **PL/pgSQL
-  trigger** (created via `RunSQL` migrations) — both explained in simple words in comments + docs.
-- Templates: `templates/base.html` + per-app folders; mobile-first, responsive Bootstrap grid.
-- Comments: short, explain WHY (not what).
-- Secrets only in `.env`. Never hardcode keys.
-- Git: small meaningful commits, imperative messages (e.g. "Add store locator with pincode search").
-- Timezone `Asia/Kolkata`; demo data is Pune-based.
-- Master/reference data (roles, FAQs, catalog + prices, Pune stores/areas) is loaded by **data
-  migrations** (`get_or_create`, never overwrites admin edits). `seed_demo` (Phase 8) adds only demo
-  people/orders.
-- HTMX partials: views return `app/_partial.html` when `core.htmx.is_htmx(request)`, else the full page;
-  always wrap with `vary_on_htmx`. Pages must still work without JavaScript (plain GET forms).
-- Money display: `{% load money %}{{ value|rupees }}` (Indian digit grouping).
-- Order status: ONLY via `orders.services.change_status()` (locks row, validates `ALLOWED_TRANSITIONS`,
-  calls `_set_audit_context` so the PL/pgSQL trigger `washo_log_order_status` (migration orders/0002) records
-  who changed it). Python never inserts `OrderStatusHistory` rows. Admin status field is read-only; use actions.
-- Slots: capacity per (date, TimeSlot, ServiceArea) via `DailySlot.booked_count`, reserved with
-  `select_for_update` inside the booking transaction; cancel releases the place.
-- Billing: `Order.estimated_total` frozen at booking; `subtotal/express_charge/discount/total` = current bill
-  (estimate until Phase 4 tagging recomputes from garments and sets `bill_finalised`). Coupon discount is
-  recalculated on the final amount (0 if it falls below `min_order_value`). DB CHECK: total = subtotal + express - discount.
-- Tagging (`tagging` app, URLs under /staff/): `Garment` per piece, `tag_code` = `<order code>-NN`, QR (inline SVG)
-  encodes the staff lookup URL. Staff/agents linked to a store via `User.store`; staff see only their store,
-  Admin sees all. Counts via `tagging.services.record_count` (pickup → store → delivery; each compared with
-  the previous; mismatch → `MismatchAlert` + email to admins on commit). `finish_tagging` records the store
-  count, calls `finalise_bill` (garment prices; booked price reused for booked items) and moves to Tagged.
-  Counts can also be entered in Django admin → Count checks (goes through record_count).
-- Delivery (`delivery` app, agent URLs under /agent/, assignment POSTs used by the staff panel):
-  `Order.pickup_agent/delivery_agent/delivery_date`. `change_status` refuses Pickup Assigned / Out for Delivery
-  without the agent. `delivery.services`: `assign_pickup_agent` (Booked→Pickup Assigned; agent must be an active
-  Delivery Agent of the order's store), `assign_delivery_agent` (Ready only), `confirm_pickup` (pickup count →
-  Picked Up), `start_delivery` (→ Out for Delivery), `confirm_delivery` (delivery count, mismatch needs confirm →
-  Delivered). `agent_jobs(agent, day)` includes overdue jobs. Tests: give orders an agent before moving them.
-- Payments (`payments` app): `Payment` (OneToOne order; cash/upi; collected_by agent). `confirm_delivery` requires
-  `payment_method` when `amount_due > 0` and records count + payment + Delivered in ONE transaction.
-  Invoice PDF: `payments.invoice.build_invoice_pdf` (lines = garments at base price; express/discount in totals);
-  `/payments/invoice/<code>/` for owner customer, staff of the store, admin; only when `bill_finalised`.
-  Escape all user text with `django.utils.html.escape` inside ReportLab Paragraphs.
-- Emails: `orders.notifications.send_order_email(order_id, status)` via `transaction.on_commit` from
-  `change_status` and `create_order`; skipped if customer has no email; failures are logged, never raised;
-  Delivered email attaches the invoice. Links use `SITE_URL`.
-- Dashboard (`dashboard` app, /dashboard/, Admin only; admin lands here after login): revenue from the
-  PostgreSQL VIEW `dashboard_daily_revenue` (migration dashboard/0001; unmanaged model `DailyRevenue`).
-  Charts: Chart.js, single-series bars in #0d6efd (validated), each with a "Show as table" fallback.
-- Demo data: `python manage.py seed_demo [--reset]` (core app). Builds orders through the real services, then
-  backdates timestamps. Demo phones: 901100xxxx customers, 902200xxxx staff, 903300xxxx agents, 9044000001 admin;
-  password `Demo@1234`. `--reset` removes only those. setup.bat step 7 runs it (skips if present).
-- Address chosen from served `ServiceArea`s; `Order.address_snapshot` keeps the address as on booking day.
+**Not yet verified by Claude (the browser extension was never connected):** live HTMX behaviour in a
+real browser, the phone layout, QR scanning from a phone, and the Chart.js charts actually drawing. All
+were checked server-side (HTTP responses / Django test client) only. They are listed as manual tests
+MT-01…MT-12 in `docs/05_test_cases.md`, with empty Actual/Status columns for the student.
 
-## 3a. Portability rule (MANDATORY every phase)
-The project must also run on a second Windows laptop. Before finishing ANY phase, update:
-- `requirements.txt` — exact pinned versions (`==`) of every installed package, incl. dependencies
-  (check with `venv\Scripts\python -m pip freeze`).
-- `.env.example` — every setting the code reads via `config(...)`, with placeholders, no real secrets.
-- `setup.bat` — checks Python 3.12–3.14, creates venv, installs requirements, creates `.env`,
-  checks DB, migrates. Add new one-time steps here (Phase 8: `seed_demo`). Keep CRLF line endings.
-- `start.bat` — daily launcher: checks venv/.env, port 8000 free, DB reachable, `migrate --noinput`,
-  `pip install -r requirements.txt` (quiet; offline-safe when nothing new), opens browser via
-  `scripts/open_browser.py`, runs server; pauses on any error. Add new start-time
-  steps here. `create_shortcut.bat` makes the Desktop shortcut. Test with `WASHO_NO_BROWSER=1`.
-- `README.md` — "Run on a new computer" section in simple steps (incl. creating the DB + user).
-Verify `setup.bat` still works on a fresh copy (no `venv`, no `.env`) when it changes.
+**Remaining work is the student's:** fill in name, roll no., guide and college in `docs/01_synopsis.md` and
+`docs/02_project_report.md`, and adjust the Gantt dates; take the 35 screenshots (`docs/06_screenshots.md`);
+do the manual tests; build the Word report from the docs plus `docs/diagrams/*.png`.
 
-## 4. Key design decisions (agreed assumptions)
-- At booking the customer gives *approximate* item counts → system shows an **estimated** total.
-  The **final bill** is computed from the actual tagged garments at the store.
-- Express service = surcharge (percentage) on the order.
-- Pickup slots: capacity per (slot, area/store, date); booking is blocked when full
-  (checked inside a DB transaction with row locking so two users can't grab the last place).
-- Garment counts recorded at 3 checkpoints: pickup (agent), store (staff, from tagged items),
-  delivery (agent). Any difference → `MismatchAlert` for admin.
-- Order statuses: Booked → Pickup Assigned → Picked Up → At Store → Tagged → In Cleaning →
-  Ready → Out for Delivery → Delivered; Cancelled allowed only before Picked Up.
+## 3. Environment facts
+- Windows 11, PowerShell 5.1 (no `&&`; use `;` and `if ($?)`). Git Bash is also available.
+- Project: `C:\Users\think\Desktop\WashO`. Python **3.14.3** venv in `venv\`. Always call
+  `venv\Scripts\python ...` (don't rely on `activate`; PowerShell script policy may block it).
+- PostgreSQL **18.3** at `C:\Program Files\PostgreSQL\18\bin` (added to the user PATH), service `postgresql-x64-18`.
+- `.env` holds the real DB password and SECRET_KEY. **Never print or commit it.** `.env.example` is the template.
+- GitHub: `origin` = https://github.com/Aryan-Jadhav/WashO.git, branch `main`, in sync. Push after
+  committing changes (the user approved pushing to this repo).
+- Git commit messages end with: `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`.
+- The user's database has the demo data **plus 2 of the user's own test orders**. Don't delete their
+  data. `seed_demo --reset` only touches demo phone ranges.
+- The Mermaid CLI used to validate and export diagrams was installed in the session scratchpad (not in the
+  project), using Edge at `C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe` as the browser.
+  Reinstall in a temp folder with `PUPPETEER_SKIP_DOWNLOAD=true` if diagrams change.
 
-## 5. Phase plan (stop after each phase, explain what was built / how to run / what to test)
-- **Phase 0** – Environment setup: PostgreSQL install, DB + user, venv, Git. Step-by-step, simple words.
-- **Phase 1** – Project skeleton, `.env`, custom user, groups/roles, base templates, public pages
-  (home, services, about, contact, FAQ).
-- **Phase 2** – Service catalog (categories, items, per-item prices, express), price list page,
-  store locator with city/area/pincode search.
-- **Phase 3** – Address book, booking flow, pickup slots + capacity, coupons, Order +
-  OrderItem + OrderStatusHistory, customer order history & live status.
-- **Phase 4** – Staff panel: incoming orders, garment tagging screen, QR codes, damage/stain
-  notes with photo, count checks, mismatch alerts.
-- **Phase 5** – Delivery agent panel: today's pickups/deliveries, count at pickup/delivery.
-- **Phase 6** – Payments (Razorpay test + COD), PDF invoice, email notifications.
-- **Phase 7** – Admin dashboard (Chart.js), revenue view (PostgreSQL VIEW), reports,
-  complaints, ratings & reviews.
-- **Phase 8** – Tests (totals, coupons, slot capacity, transitions, mismatch), `seed_demo`
-  command (3 Pune stores, 20 customers, 60 orders, full price list), README.
-- **Phase 9** – Academic docs in `/docs` (Markdown + Mermaid): synopsis, full report chapters,
-  all diagrams, data dictionary, test case table, screenshot list, viva prep (40 Q&A).
+## 4. Tech stack (fixed; ask before changing)
+| Layer | Choice (exact versions in `requirements.txt`) |
+|---|---|
+| Language / framework | Python 3.14.3 · Django **5.2.17 LTS** |
+| Database | PostgreSQL 18.3 via `psycopg[binary]` 3.3.6 |
+| Frontend | Django templates + Bootstrap 5.3.8 + Bootstrap Icons 1.13.1 (CDN); Poppins font |
+| Dynamic bits | HTMX 2.0.4 (CDN). Pages must still work without JavaScript |
+| Charts | Chart.js 4.4.1 (CDN) on the admin dashboard |
+| Config | `.env` via `python-decouple` 3.8 |
+| Payments | **Cash on Delivery only** (cash or UPI to the agent) |
+| PDF | `reportlab` 5.0.1 (PDFs print `Rs.`; the base fonts have no ₹ glyph) |
+| QR / images | `qrcode` 8.2 (inline SVG) · `pillow` 12.3.0 (photo uploads) |
+| Email | console backend in dev; SMTP settings documented in `.env.example` |
+| Tests | Django `TestCase` on a real PostgreSQL test DB (`manage.py test`) |
 
-## 6. Status
-- [x] Phase 0  - [x] Phase 1  - [x] Phase 2  - [x] Phase 3  - [x] Phase 4
-- [x] Phase 5  - [x] Phase 6  - [x] Phase 7 (dashboard only; complaints & reviews dropped → Future Enhancements, user decision 2026-10-02)  - [x] Phase 8  - [x] Phase 9 (docs/: synopsis, report, 13 diagrams + PNGs, generated data dictionary, test cases, screenshots list, viva prep)
+## 5. Code map (9 apps)
+| App | URL prefix | Responsibility |
+|---|---|---|
+| `core` | `/` | Public pages, FAQ, contact; `BootstrapFormMixin`; `money` template filter (`rupees`, `format_inr`); `htmx.py`; **`seed_demo`** command |
+| `accounts` | `/account/`, `/login/` | Custom `User` (phone login, optional unique email, `store` FK for staff/agents), `Address`, `roles.py`, `permissions.py` (`role_required`, `RoleRequiredMixin`), `after_login` role routing |
+| `stores` | `/stores/` | `City`, `Store`, `ServiceArea` (pincodes), store locator |
+| `catalog` | `/prices/` | `ServiceCategory` (express %), `Item`, `ServicePrice`, price list |
+| `orders` | `/orders/` | `TimeSlot`, `DailySlot`, `Coupon`, `Order`, `OrderItem`, `OrderStatusHistory`; `pricing.py`, **`services.py`**, `notifications.py` |
+| `tagging` | `/staff/` | `Garment`, `CountCheck`, `MismatchAlert`; staff panel, QR (`templatetags/qr.py`), alerts page |
+| `delivery` | `/agent/` | Agent assignment, "My jobs", pickup and delivery confirmation |
+| `payments` | `/payments/` | `Payment`, `services.py`, `invoice.py` (PDF) |
+| `dashboard` | `/dashboard/` | `DailyRevenue` (unmanaged model over a view), KPIs and charts |
 
-## 7. Common commands
-- Regenerate data dictionary after model changes: `venv\Scripts\python scripts\gen_data_dictionary.py`
-- Diagrams: Mermaid in docs/03_diagrams.md; PNGs in docs/diagrams/ (export via mermaid.live or mermaid-cli)
+Other: `templates/` (base, partials, one folder per app, `emails/`), `static/` (css, svg logo), `scripts/`
+(`check_db.py`, `make_env.py`, `open_browser.py`, `gen_data_dictionary.py`), `docs/`,
+`setup.bat` / `start.bat` / `create_shortcut.bat`.
 
+## 6. Rules and conventions (keep following these)
+- **Business rules live in `services.py`**, never in views. Views: role check → server-side form validation → service call → template.
+- **Order status changes ONLY through `orders.services.change_status()`.** It locks the row, validates `ALLOWED_TRANSITIONS`,
+  refuses Pickup Assigned / Out for Delivery without an agent, calls `_set_audit_context` (`set_config('washo.changed_by')`)
+  and emails the customer on commit. **Python never inserts `OrderStatusHistory`**: the PL/pgSQL trigger
+  `washo_log_order_status` (migration `orders/0002`) does. The admin status field is read-only; use the admin actions.
+- **Slots:** capacity per (date, TimeSlot, ServiceArea) via `DailySlot.booked_count`, reserved with `select_for_update`
+  inside the booking transaction; cancelling releases the place. Bookings up to 7 days ahead, at least 60 minutes before the slot starts.
+- **Billing:** `estimated_total` is frozen at booking. `subtotal/express_charge/discount/total` is the current bill, which
+  `tagging.services.finalise_bill` recomputes from the garments (sets `bill_finalised`; booked prices are reused for booked
+  items; the coupon is re-applied and gives 0 below its minimum). DB CHECK: `total = subtotal + express_charge - discount`.
+- **Counts:** `tagging.services.record_count` (pickup → store → delivery, each compared with the previous;
+  mismatch → `MismatchAlert` + email to admins on commit). Staff/agents must tick a confirmation to continue with a mismatch.
+- **Delivery:** `delivery.services` (`assign_pickup_agent`, `assign_delivery_agent`, `confirm_pickup`, `start_delivery`,
+  `confirm_delivery`). `confirm_delivery` saves the count, the `Payment` and Delivered in ONE transaction.
+- **Access:** staff and agents see only their `User.store`; Admin sees everything. Someone else's data → **404**, wrong role → **403**.
+- **Emails:** `orders.notifications.send_order_email(order_id, status)` via `transaction.on_commit`; skipped if there's no
+  customer email; failures are logged, never raised; the Delivered email attaches the invoice.
+- **Money:** `DecimalField`, never float; show with `{% load money %}{{ v|rupees }}` (Indian grouping).
+- **HTMX:** return `app/_partial.html` when `core.htmx.is_htmx(request)`, and wrap the response with `vary_on_htmx`.
+- **Templates:** `{# #}` comments must be ONE line; use `{% comment %}` for longer ones (a test enforces this).
+- **ReportLab:** escape all user text with `django.utils.html.escape` inside Paragraphs.
+- **DB:** 3NF; explicit `on_delete`; Check/Unique constraints for the important rules; indexes on searched fields;
+  soft delete (`is_active`) for addresses, stores and areas. Master data (roles, FAQs, catalog, stores, slots, coupons) comes
+  from **data migrations** using `get_or_create`.
+- **PostgreSQL features for the viva:** the trigger (`orders/0002`) and the VIEW `dashboard_daily_revenue` (`dashboard/0001`).
+- **Tests:** add tests for every rule. Orders need an agent before they move past Booked. Use
+  `captureOnCommitCallbacks(execute=True)` to test emails and alerts.
+- **Charts:** single-series bars in `#0d6efd` (validated; the teal `#14b8a6` fails contrast for marks), each with a "Show as table" fallback.
+- **Git:** small commits with imperative messages; then `git push`.
+- **After model changes:** run `venv\Scripts\python scripts\gen_data_dictionary.py` and update the affected docs and diagrams.
+
+## 7. Portability rule (MANDATORY after any change)
+The project must also run on a second Windows laptop. Keep these up to date:
+- `requirements.txt`: exact `==` pins of every package including dependencies (`pip freeze`).
+- `.env.example`: every `config(...)` setting, with placeholders and no secrets.
+- `setup.bat` (7 steps): Python 3.12–3.14 check → venv (rebuilt if broken) → pip install → `.env` from the template
+  (then stops for the password) → DB check → migrate → `seed_demo`. CRLF line endings (`.gitattributes`).
+- `start.bat`: checks venv/.env, port 8000 free, DB reachable → pip install (quiet) → `migrate --noinput` →
+  opens the browser via `scripts/open_browser.py` → runserver; pauses on any error. Test with `WASHO_NO_BROWSER=1`.
+- `README.md`: "Run on a new computer" in simple steps, plus demo logins and troubleshooting.
+
+## 8. Demo data
+`venv\Scripts\python manage.py seed_demo [--reset]`: 3 Pune stores (from migrations), 1 staff + 2 agents per store,
+20 customers, 60 orders over 6 weeks in all 10 statuses, ~350 garments, ~₹24k collected, 2 open + 2 resolved alerts.
+Orders are built through the real services, then backdated. All demo passwords: **`Demo@1234`**.
+
+| Role | Phones |
+|---|---|
+| Admin | 9044000001 |
+| Staff (Baner / Kothrud / Viman Nagar) | 9022000001 / 9022000002 / 9022000003 |
+| Agents (Baner, Kothrud, Viman Nagar) | 9033000001-02, 9033000003-04, 9033000005-06 |
+| Customers | 9011000001 … 9011000020 |
+
+## 9. Commands
 ```
-venv\Scripts\activate          # venv uses Python 3.14
-python scripts\check_db.py       # verify DB connection + permissions
-python manage.py migrate
-python manage.py createsuperuser    # asks for mobile number + password
-python manage.py runserver
-python manage.py test
-python manage.py seed_demo
+venv\Scripts\python manage.py test                  # 138 tests, ~2.5 minutes
+venv\Scripts\python manage.py seed_demo --reset     # rebuild demo data
+venv\Scripts\python scripts\check_db.py             # DB connection + permissions
+venv\Scripts\python scripts\gen_data_dictionary.py  # regenerate docs/04_data_dictionary.md
+venv\Scripts\python manage.py runserver             # or double-click start.bat
 ```
+
+## 10. Ideas if more work is requested (each needs the user's OK)
+Complaints/support tickets, ratings & reviews, online payment gateway, SMS/WhatsApp notifications, delivery time slots,
+an agent mobile app with in-app QR scanning, and production deployment (Gunicorn + Nginx + HTTPS, `DEBUG=False`, backups).
