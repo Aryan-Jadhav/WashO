@@ -7,6 +7,10 @@ import sys
 import psycopg
 from decouple import config
 
+if config("DB_PASSWORD", default="") in ("", "PUT_YOUR_DB_PASSWORD_HERE"):
+    print("DB_PASSWORD is not set yet. Open .env and type the washo_user password.")
+    sys.exit(1)
+
 try:
     conn = psycopg.connect(
         dbname=config("DB_NAME"),
