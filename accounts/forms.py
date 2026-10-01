@@ -2,8 +2,9 @@ from django import forms
 from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm, UserCreationForm
 
 from core.forms import BootstrapFormMixin
+from stores.models import ServiceArea
 
-from .models import User
+from .models import Address, User
 from .validators import normalize_phone, phone_validator
 
 
@@ -75,3 +76,21 @@ class ProfileForm(BootstrapFormMixin, EmailCleanMixin, forms.ModelForm):
 
 class StyledPasswordChangeForm(BootstrapFormMixin, PasswordChangeForm):
     pass
+
+
+class AddressForm(BootstrapFormMixin, forms.ModelForm):
+    class Meta:
+        model = Address
+        fields = ["label", "line1", "line2", "area", "is_default"]
+        labels = {"is_default": "Make this my default address"}
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        area_field = self.fields["area"]
+        area_field.queryset = (
+            ServiceArea.objects.filter(is_active=True, store__is_active=True)
+            .select_related("store__city").order_by("name")
+        )
+        area_field.label_from_instance = lambda a: f"{a.name} ({a.pincode})"
+        area_field.empty_label = "Select your locality"
+        area_field.help_text = "Only localities we serve are listed. Not there? We don't pick up from it yet."

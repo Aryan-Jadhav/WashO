@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.forms import UserChangeForm, UserCreationForm
 
-from .models import User
+from .models import Address, User
 
 
 class AdminUserCreationForm(UserCreationForm):
@@ -55,3 +55,12 @@ class UserAdmin(BaseUserAdmin):
     @admin.display(description="Role")
     def role_name(self, obj):
         return obj.role or "—"
+
+
+@admin.register(Address)
+class AddressAdmin(admin.ModelAdmin):
+    list_display = ["user", "label", "line1", "area", "is_default", "is_active"]
+    list_filter = ["label", "is_active", "area__store"]
+    search_fields = ["user__phone", "user__first_name", "line1", "line2", "area__name", "area__pincode"]
+    list_select_related = ["user", "area"]
+    autocomplete_fields = ["user"]

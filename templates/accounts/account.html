@@ -48,18 +48,18 @@
       {% endif %}
       {% if user.is_customer %}
         <div class="row g-3">
-          <div class="col-sm-6"><div class="card border-0 shadow-sm h-100"><div class="card-body">
+          <div class="col-sm-6"><a href="{% url 'orders:book' %}" class="card border-0 shadow-sm h-100 text-reset text-decoration-none order-card"><div class="card-body">
             <h5><i class="bi bi-calendar-plus me-2 text-primary"></i>Book a pickup</h5>
-            <p class="text-muted small mb-0">Coming in Phase 3.</p>
-          </div></div></div>
-          <div class="col-sm-6"><div class="card border-0 shadow-sm h-100"><div class="card-body">
+            <p class="text-muted small mb-0">Choose services, a date and a time slot.</p>
+          </div></a></div>
+          <div class="col-sm-6"><a href="{% url 'orders:list' %}" class="card border-0 shadow-sm h-100 text-reset text-decoration-none order-card"><div class="card-body">
             <h5><i class="bi bi-bag me-2 text-primary"></i>My orders</h5>
-            <p class="text-muted small mb-0">Your order history and live status. Coming in Phase 3.</p>
-          </div></div></div>
-          <div class="col-sm-6"><div class="card border-0 shadow-sm h-100"><div class="card-body">
+            <p class="text-muted small mb-0">Order history and live status.</p>
+          </div></a></div>
+          <div class="col-sm-6"><a href="{% url 'accounts:address_list' %}" class="card border-0 shadow-sm h-100 text-reset text-decoration-none order-card"><div class="card-body">
             <h5><i class="bi bi-geo-alt me-2 text-primary"></i>Address book</h5>
-            <p class="text-muted small mb-0">Saved pickup addresses. Coming in Phase 3.</p>
-          </div></div></div>
+            <p class="text-muted small mb-0">Your saved pickup addresses.</p>
+          </div></a></div>
           <div class="col-sm-6"><div class="card border-0 shadow-sm h-100"><div class="card-body">
             <h5><i class="bi bi-headset me-2 text-primary"></i>Support</h5>
             <p class="text-muted small mb-0">Raise a complaint about an order. Coming in Phase 7.</p>

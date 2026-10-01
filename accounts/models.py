@@ -121,3 +121,46 @@ class User(AbstractUser):
     @property
     def is_admin_role(self):
         return self.has_role(Role.ADMIN)
+
+
+class Address(models.Model):
+    """A customer's saved pickup/delivery address.
+
+    The locality is chosen from the areas we serve (stores.ServiceArea), so a
+    customer can never book a pickup from a place we don't cover. Pincode and
+    city come through the area, so they are not stored again here (3NF).
+    """
+
+    class Label(models.TextChoices):
+        HOME = "home", "Home"
+        WORK = "work", "Work"
+        OTHER = "other", "Other"
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="addresses")
+    label = models.CharField(max_length=10, choices=Label.choices, default=Label.HOME)
+    line1 = models.CharField("flat / house no., building", max_length=150)
+    line2 = models.CharField("street / landmark", max_length=150, blank=True)
+    area = models.ForeignKey("stores.ServiceArea", on_delete=models.PROTECT, related_name="addresses",
+                             verbose_name="locality")
+    is_default = models.BooleanField(default=False)
+    # WHY soft delete: old orders still point to this address.
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-is_default", "-created_at"]
+        verbose_name_plural = "addresses"
+        constraints = [
+            # At most ONE default address per customer (PostgreSQL partial unique index).
+            models.UniqueConstraint(
+                fields=["user"], condition=Q(is_default=True, is_active=True), name="one_default_address_per_user",
+            ),
+        ]
+
+    def __str__(self):
+        return f"{self.get_label_display()}: {self.one_line()}"
+
+    def one_line(self):
+        area = self.area
+        parts = [self.line1, self.line2, area.name, f"{area.store.city.name} - {area.pincode}"]
+        return ", ".join(p for p in parts if p)

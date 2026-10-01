@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}{% if is_new %}Add address{% else %}Edit address{% endif %}{% endblock %}
+
+{% block content %}
+<div class="container py-5" style="max-width: 640px;">
+  <a href="{% url 'accounts:address_list' %}" class="small"><i class="bi bi-arrow-left"></i> Back to my addresses</a>
+  <div class="card border-0 shadow-sm mt-3">
+    <div class="card-body p-4">
+      <h3 class="mb-4">{% if is_new %}Add a new address{% else %}Edit address{% endif %}</h3>
+      <form method="post" novalidate>
+        {% csrf_token %}
+        {% include "partials/_form.html" %}
+        <button type="submit" class="btn btn-primary">Save address</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

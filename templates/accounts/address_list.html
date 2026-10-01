@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}My addresses{% endblock %}
+
+{% block content %}
+<div class="container py-5" style="max-width: 900px;">
+  <a href="{% url 'accounts:account' %}" class="small"><i class="bi bi-arrow-left"></i> Back to my account</a>
+  <div class="d-flex justify-content-between align-items-center mt-3 mb-4">
+    <h2 class="mb-0">My addresses</h2>
+    <a href="{% url 'accounts:address_create' %}" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>Add address</a>
+  </div>
+
+  <div class="row g-3">
+    {% for a in addresses %}
+    <div class="col-md-6">
+      <div class="card h-100 border-0 shadow-sm {% if a.is_default %}border-start border-4 border-primary{% endif %}">
+        <div class="card-body">
+          <div class="d-flex justify-content-between">
+            <h5 class="mb-2"><i class="bi bi-{% if a.label == 'work' %}briefcase{% elif a.label == 'home' %}house{% else %}geo-alt{% endif %} me-2 text-primary"></i>{{ a.get_label_display }}</h5>
+            {% if a.is_default %}<span class="badge text-bg-primary align-self-start">Default</span>{% endif %}
+          </div>
+          <p class="small mb-1">{{ a.line1 }}{% if a.line2 %}, {{ a.line2 }}{% endif %}</p>
+          <p class="small text-muted mb-0">{{ a.area.name }}, {{ a.area.store.city.name }} – {{ a.area.pincode }}</p>
+          <p class="small text-muted mb-0"><i class="bi bi-shop me-1"></i>Served by {{ a.area.store.name }}</p>
+        </div>
+        <div class="card-footer bg-white border-0 d-flex gap-2 pb-3">
+          <a href="{% url 'accounts:address_edit' a.pk %}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i> Edit</a>
+          <form method="post" action="{% url 'accounts:address_delete' a.pk %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i> Remove</button>
+          </form>
+        </div>
+      </div>
+    </div>
+    {% empty %}
+    <div class="col-12 text-center text-muted py-5">
+      <i class="bi bi-geo-alt display-6"></i>
+      <p class="mt-2">No saved addresses yet. Add one to book your first pickup.</p>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}
