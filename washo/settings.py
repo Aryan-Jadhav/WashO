@@ -33,6 +33,7 @@ INSTALLED_APPS = [
     "tagging",
     "delivery",
     "payments",
+    "dashboard",
 ]
 
 MIDDLEWARE = [

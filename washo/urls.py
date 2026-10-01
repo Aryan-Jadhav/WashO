@@ -25,6 +25,7 @@ urlpatterns = [
     path("staff/", include("tagging.urls")),
     path("agent/", include("delivery.urls")),
     path("payments/", include("payments.urls")),
+    path("dashboard/", include("dashboard.urls")),
     path("", include("core.urls")),
 ]
 

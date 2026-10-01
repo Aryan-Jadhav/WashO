@@ -35,12 +35,14 @@ def register(request):
 def after_login(request):
     """Single place that decides where each role lands after logging in.
 
-    Staff go to the staff panel, agents to My jobs, everyone else to My account.
+    Staff go to the staff panel, agents to My jobs, admin to the dashboard, customers to My account.
     """
     if request.user.has_role(Role.STAFF):
         return redirect("tagging:panel")
     if request.user.has_role(Role.AGENT):
         return redirect("delivery:my_jobs")
+    if request.user.has_role(Role.ADMIN):
+        return redirect("dashboard:home")
     return redirect("accounts:account")
 
 

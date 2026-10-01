@@ -93,3 +93,13 @@ body { background: #fff; color: #1f2937; }
 /* ---------- Phase 4: tagging ---------- */
 svg.qr { width: 100%; height: auto; display: block; }  /* size comes from the wrapping box */
 .garment-thumb { width: 48px; height: 48px; object-fit: cover; border-radius: .4rem; display: block; }
+
+/* ---------- Dashboard ---------- */
+.kpi { background: #fff; border-radius: 1rem; padding: 1rem; height: 100%; box-shadow: 0 .125rem .25rem rgba(0,0,0,.075); color: inherit; }
+.kpi-label { font-size: .8rem; color: #6c757d; }
+.kpi-value { font-size: 1.6rem; font-weight: 700; color: #1f2937; line-height: 1.2; }
+.kpi-sub { font-size: .75rem; color: #6c757d; }
+.kpi-alert { border-left: 4px solid #dc3545; }
+.kpi-alert .kpi-label { color: #b02a37; }
+.chart-box { position: relative; height: 240px; }
+.chart-box-tall { height: 300px; }

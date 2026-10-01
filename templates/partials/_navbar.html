@@ -45,6 +45,7 @@
                 <li><a class="dropdown-item" href="{% url 'tagging:panel' %}"><i class="bi bi-shop me-2"></i>Staff panel</a></li>
               {% endif %}
               {% if user.is_admin_role %}
+                <li><a class="dropdown-item" href="{% url 'dashboard:home' %}"><i class="bi bi-speedometer2 me-2"></i>Dashboard</a></li>
                 <li><a class="dropdown-item" href="{% url 'tagging:alerts' %}"><i class="bi bi-exclamation-triangle me-2"></i>Mismatch alerts</a></li>
               {% endif %}
               {% if user.is_staff %}
