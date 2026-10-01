@@ -11,7 +11,7 @@ echo ============ WashO setup ============
 echo.
 
 REM --- 1. Find a supported Python (3.12, 3.13 or 3.14) ----------------
-echo [1/6] Looking for Python 3.12 - 3.14 ...
+echo [1/7] Looking for Python 3.12 - 3.14 ...
 set "PY="
 for %%V in (3.14 3.13 3.12) do (
     if not defined PY (
@@ -38,7 +38,7 @@ for /f "delims=" %%P in ('%PY% --version') do echo   Found %%P  ^(using "%PY%"^)
 
 REM --- 2. Create the virtual environment -------------------------------
 echo.
-echo [2/6] Creating virtual environment "venv" ...
+echo [2/7] Creating virtual environment "venv" ...
 if exist "venv\Scripts\python.exe" (
     REM A venv copied from another computer does not work - detect and rebuild it.
     "venv\Scripts\python.exe" -c "import sys" >nul 2>&1
@@ -57,7 +57,7 @@ if not exist "venv\Scripts\python.exe" (
 
 REM --- 3. Install the exact package versions ---------------------------
 echo.
-echo [3/6] Installing packages from requirements.txt (needs internet) ...
+echo [3/7] Installing packages from requirements.txt (needs internet) ...
 "venv\Scripts\python.exe" -m pip install --upgrade pip --quiet
 "venv\Scripts\python.exe" -m pip install -r requirements.txt --quiet
 if errorlevel 1 ( echo   ERROR: package installation failed. Check your internet connection. & goto :fail )
@@ -65,7 +65,7 @@ echo   Packages installed.
 
 REM --- 4. Create .env from the template ---------------------------------
 echo.
-echo [4/6] Preparing the .env settings file ...
+echo [4/7] Preparing the .env settings file ...
 "venv\Scripts\python.exe" scripts\make_env.py
 findstr /C:"PUT_YOUR_DB_PASSWORD_HERE" .env >nul
 if not errorlevel 1 (
@@ -78,7 +78,7 @@ if not errorlevel 1 (
 
 REM --- 5. Check the database connection ---------------------------------
 echo.
-echo [5/6] Checking the PostgreSQL connection ...
+echo [5/7] Checking the PostgreSQL connection ...
 "venv\Scripts\python.exe" scripts\check_db.py
 if errorlevel 1 (
     echo   Fix the problem above ^(see README: "Run on a new computer"^), then run setup.bat again.
@@ -87,16 +87,21 @@ if errorlevel 1 (
 
 REM --- 6. Create / update the database tables ---------------------------
 echo.
-echo [6/6] Applying database migrations ...
+echo [6/7] Applying database migrations ...
 "venv\Scripts\python.exe" manage.py migrate
 if errorlevel 1 ( echo   ERROR: migrations failed. & goto :fail )
 
-REM (Phase 8 will add: load demo data with "manage.py seed_demo")
+REM --- 7. Load the Pune demo data (skipped automatically if already loaded) --
+echo.
+echo [7/7] Loading demo data (stores' staff, agents, 20 customers, 60 orders) ...
+"venv\Scripts\python.exe" manage.py seed_demo
+if errorlevel 1 ( echo   ERROR: loading demo data failed. & goto :fail )
 
 echo.
 echo ============ Setup complete ============
 echo  Next steps:
-echo    1. Create your admin login (once):  venv\Scripts\python manage.py createsuperuser
+echo    1. Demo logins: see README (password Demo@1234), or make your own admin:
+echo       venv\Scripts\python manage.py createsuperuser
 echo    2. Start WashO: double-click start.bat (it opens your browser by itself)
 echo    3. Optional: double-click create_shortcut.bat for a WashO icon on the Desktop.
 echo.

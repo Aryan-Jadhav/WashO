@@ -108,6 +108,7 @@ Run these from the `WashO` folder:
 | Start the website | Double-click `start.bat` (or the **WashO** Desktop shortcut) |
 | Create the Desktop shortcut (once) | Double-click `create_shortcut.bat` |
 | Run all automatic tests | `venv\Scripts\python manage.py test` |
+| Reload the demo data | `venv\Scripts\python manage.py seed_demo --reset` |
 | Check the database connection | `venv\Scripts\python scripts\check_db.py` |
 | Apply new database changes (after pulling new code) | `venv\Scripts\python manage.py migrate` |
 | Re-install packages (after requirements.txt changes) | `venv\Scripts\python -m pip install -r requirements.txt` |
@@ -146,6 +147,8 @@ WashO/
 ├── tagging/        Staff panel: garment tagging + QR codes, damage photos, counts, mismatch alerts
 ├── delivery/       Agent panel (My jobs): pickups & deliveries with garment counts; agent assignment
 ├── payments/       Cash on Delivery collection, PDF invoices
+├── dashboard/      Admin dashboard (Chart.js) reading the PostgreSQL revenue VIEW
+├── docs/           Project report, synopsis, diagrams, data dictionary, test cases, viva prep
 ├── media/          Uploaded photos (created automatically, not in Git)
 ├── templates/      HTML templates (base layout + one folder per app)
 ├── static/         CSS and images
@@ -156,6 +159,23 @@ WashO/
 ├── requirements.txt  Exact package versions
 └── .env.example    Template for the .env settings file
 ```
+
+## Demo logins
+`setup.bat` loads Pune demo data (`python manage.py seed_demo`): staff and 2 delivery agents per store,
+20 customers and 60 orders over the last 6 weeks in every status, including 2 open garment-count mismatch
+alerts. **Every demo account uses the password `Demo@1234`.**
+
+| Role | Mobile number | Lands on |
+|---|---|---|
+| Admin | `9044000001` | Dashboard |
+| Store Staff, Baner / Kothrud / Viman Nagar | `9022000001` / `9022000002` / `9022000003` | Staff panel |
+| Delivery Agents, Baner | `9033000001`, `9033000002` | My jobs |
+| Delivery Agents, Kothrud | `9033000003`, `9033000004` | My jobs |
+| Delivery Agents, Viman Nagar | `9033000005`, `9033000006` | My jobs |
+| Customers | `9011000001` … `9011000020` | My account |
+
+To rebuild the demo data from scratch: `venv\Scripts\python manage.py seed_demo --reset`.
+(Only demo accounts and their orders are removed; your own accounts and orders are kept.)
 
 ## Emails
 While developing, every email (booking, each status change, delivery with the PDF invoice attached)

@@ -85,6 +85,12 @@ and code must carry short WHY-comments that help in the viva.
 - Emails: `orders.notifications.send_order_email(order_id, status)` via `transaction.on_commit` from
   `change_status` and `create_order`; skipped if customer has no email; failures are logged, never raised;
   Delivered email attaches the invoice. Links use `SITE_URL`.
+- Dashboard (`dashboard` app, /dashboard/, Admin only; admin lands here after login): revenue from the
+  PostgreSQL VIEW `dashboard_daily_revenue` (migration dashboard/0001; unmanaged model `DailyRevenue`).
+  Charts: Chart.js, single-series bars in #0d6efd (validated), each with a "Show as table" fallback.
+- Demo data: `python manage.py seed_demo [--reset]` (core app). Builds orders through the real services, then
+  backdates timestamps. Demo phones: 901100xxxx customers, 902200xxxx staff, 903300xxxx agents, 9044000001 admin;
+  password `Demo@1234`. `--reset` removes only those. setup.bat step 7 runs it (skips if present).
 - Address chosen from served `ServiceArea`s; `Order.address_snapshot` keeps the address as on booking day.
 
 ## 3a. Portability rule (MANDATORY every phase)
@@ -133,7 +139,7 @@ Verify `setup.bat` still works on a fresh copy (no `venv`, no `.env`) when it ch
 
 ## 6. Status
 - [x] Phase 0  - [x] Phase 1  - [x] Phase 2  - [x] Phase 3  - [x] Phase 4
-- [x] Phase 5  - [x] Phase 6  - [ ] Phase 7  - [ ] Phase 8  - [ ] Phase 9
+- [x] Phase 5  - [x] Phase 6  - [x] Phase 7 (dashboard only; complaints & reviews dropped → Future Enhancements, user decision 2026-10-02)  - [x] Phase 8  - [ ] Phase 9
 
 ## 7. Common commands (filled in as we go)
 ```
