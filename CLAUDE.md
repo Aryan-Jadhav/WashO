@@ -139,9 +139,12 @@ Verify `setup.bat` still works on a fresh copy (no `venv`, no `.env`) when it ch
 
 ## 6. Status
 - [x] Phase 0  - [x] Phase 1  - [x] Phase 2  - [x] Phase 3  - [x] Phase 4
-- [x] Phase 5  - [x] Phase 6  - [x] Phase 7 (dashboard only; complaints & reviews dropped → Future Enhancements, user decision 2026-10-02)  - [x] Phase 8  - [ ] Phase 9
+- [x] Phase 5  - [x] Phase 6  - [x] Phase 7 (dashboard only; complaints & reviews dropped → Future Enhancements, user decision 2026-10-02)  - [x] Phase 8  - [x] Phase 9 (docs/: synopsis, report, 13 diagrams + PNGs, generated data dictionary, test cases, screenshots list, viva prep)
 
-## 7. Common commands (filled in as we go)
+## 7. Common commands
+- Regenerate data dictionary after model changes: `venv\Scripts\python scripts\gen_data_dictionary.py`
+- Diagrams: Mermaid in docs/03_diagrams.md; PNGs in docs/diagrams/ (export via mermaid.live or mermaid-cli)
+
 ```
 venv\Scripts\activate          # venv uses Python 3.14
 python scripts\check_db.py       # verify DB connection + permissions
