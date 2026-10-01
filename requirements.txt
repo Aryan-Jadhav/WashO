@@ -1,3 +1,16 @@
-Django>=5.2,<5.3
-psycopg[binary]>=3.2
-python-decouple>=3.8
+# Exact versions so every computer installs the same thing.
+# Install with:  venv\Scripts\python -m pip install -r requirements.txt
+# Update this file whenever a package is added or upgraded (pip freeze).
+
+# Web framework (5.2 = LTS, supported until April 2028)
+Django==5.2.17
+asgiref==3.12.1
+sqlparse==0.6.0
+tzdata==2026.4
+
+# PostgreSQL driver (psycopg 3, with pre-built binary so no compiler is needed)
+psycopg==3.3.6
+psycopg-binary==3.3.6
+
+# Reads settings from the .env file
+python-decouple==3.8
