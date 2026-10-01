@@ -51,6 +51,12 @@ and code must carry short WHY-comments that help in the viva.
 - Secrets only in `.env`. Never hardcode keys.
 - Git: small meaningful commits, imperative messages (e.g. "Add store locator with pincode search").
 - Timezone `Asia/Kolkata`; demo data is Pune-based.
+- Master/reference data (roles, FAQs, catalog + prices, Pune stores/areas) is loaded by **data
+  migrations** (`get_or_create`, never overwrites admin edits). `seed_demo` (Phase 8) adds only demo
+  people/orders.
+- HTMX partials: views return `app/_partial.html` when `core.htmx.is_htmx(request)`, else the full page;
+  always wrap with `vary_on_htmx`. Pages must still work without JavaScript (plain GET forms).
+- Money display: `{% load money %}{{ value|rupees }}` (Indian digit grouping).
 
 ## 3a. Portability rule (MANDATORY every phase)
 The project must also run on a second Windows laptop. Before finishing ANY phase, update:
@@ -93,7 +99,7 @@ Verify `setup.bat` still works on a fresh copy (no `venv`, no `.env`) when it ch
   all diagrams, data dictionary, test case table, screenshot list, viva prep (40 Q&A).
 
 ## 6. Status
-- [x] Phase 0  - [x] Phase 1  - [ ] Phase 2  - [ ] Phase 3  - [ ] Phase 4
+- [x] Phase 0  - [x] Phase 1  - [x] Phase 2  - [ ] Phase 3  - [ ] Phase 4
 - [ ] Phase 5  - [ ] Phase 6  - [ ] Phase 7  - [ ] Phase 8  - [ ] Phase 9
 
 ## 7. Common commands (filled in as we go)
