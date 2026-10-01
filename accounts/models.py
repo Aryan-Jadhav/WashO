@@ -51,6 +51,9 @@ class User(AbstractUser):
         help_text="10-digit mobile number, used to log in.",
     )
     email = models.EmailField("email address", blank=True)
+    # Store Staff and Delivery Agents work at one store; customers leave this empty.
+    store = models.ForeignKey("stores.Store", on_delete=models.PROTECT, null=True, blank=True,
+                              related_name="team", help_text="Only for Store Staff and Delivery Agents.")
 
     USERNAME_FIELD = "phone"
     REQUIRED_FIELDS = []  # asked by `createsuperuser` besides phone + password

@@ -24,14 +24,15 @@ class UserAdmin(BaseUserAdmin):
     form = AdminUserChangeForm
     add_form = AdminUserCreationForm
 
-    list_display = ["phone", "first_name", "last_name", "email", "role_name", "is_active"]
-    list_filter = ["groups", "is_active", "is_staff"]
+    list_display = ["phone", "first_name", "last_name", "email", "role_name", "store", "is_active"]
+    list_filter = ["groups", "store", "is_active", "is_staff"]
     search_fields = ["phone", "first_name", "last_name", "email"]
     ordering = ["phone"]
 
     fieldsets = (
         (None, {"fields": ("phone", "password")}),
         ("Personal info", {"fields": ("first_name", "last_name", "email")}),
+        ("Works at", {"fields": ("store",), "description": "Required for Store Staff and Delivery Agents."}),
         (
             "Role & permissions",
             {
