@@ -19,18 +19,23 @@ def _indian_grouping(whole: str) -> str:
     return ",".join(groups) + "," + tail
 
 
-@register.filter
-def rupees(value):
-    """{{ price|rupees }} -> '₹1,499' or '₹1,23,456.50'. Blank for None."""
+def format_inr(value, symbol="₹", always_paise=False):
+    """1499 -> '₹1,499'; 123456.5 -> '₹1,23,456.50'. Used by templates and the PDF invoice."""
     if value in (None, ""):
         return ""
     try:
         amount = Decimal(value).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
     except (InvalidOperation, TypeError, ValueError):
-        return value
+        return str(value)
     sign = "-" if amount < 0 else ""
     whole, paise = f"{abs(amount):.2f}".split(".")
     text = _indian_grouping(whole)
-    if paise != "00":
+    if paise != "00" or always_paise:
         text += "." + paise
-    return f"{sign}₹{text}"
+    return f"{sign}{symbol}{text}"
+
+
+@register.filter
+def rupees(value):
+    """{{ price|rupees }} -> '₹1,499' or '₹1,23,456.50'. Blank for None."""
+    return format_inr(value)

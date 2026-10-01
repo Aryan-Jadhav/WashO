@@ -21,3 +21,7 @@ colorama==0.4.6 ; platform_system == "Windows"
 
 # Image handling for damage/stain photos (Django ImageField needs it)
 pillow==12.3.0
+
+# PDF invoices (charset-normalizer is a ReportLab dependency)
+reportlab==5.0.1
+charset-normalizer==3.5.2
