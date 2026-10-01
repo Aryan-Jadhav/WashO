@@ -25,7 +25,7 @@
         <div class="text-end">
           <span class="badge text-bg-{{ o.status|status_colour }}">{{ o.get_status_display }}</span>
           <div class="fw-semibold mt-1">{{ o.total|rupees }}</div>
-          <div class="small text-muted">{% if o.bill_finalised %}Final bill{% else %}Estimate{% endif %}</div>
+          <div class="small text-muted">{% if o.payment %}<span class="text-success">Paid</span>{% elif o.bill_finalised %}Final bill{% else %}Estimate{% endif %}</div>
         </div>
       </div>
     </a>

@@ -24,6 +24,7 @@ urlpatterns = [
     path("orders/", include("orders.urls")),
     path("staff/", include("tagging.urls")),
     path("agent/", include("delivery.urls")),
+    path("payments/", include("payments.urls")),
     path("", include("core.urls")),
 ]
 

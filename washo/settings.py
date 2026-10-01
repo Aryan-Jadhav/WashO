@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     "orders",
     "tagging",
     "delivery",
+    "payments",
 ]
 
 MIDDLEWARE = [
@@ -120,6 +121,14 @@ EMAIL_BACKEND = config(
 )
 DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL", default="WashO <no-reply@washo.local>")
 SUPPORT_EMAIL = config("SUPPORT_EMAIL", default="support@washo.local")
+# Real SMTP (optional): set EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend and these.
+EMAIL_HOST = config("EMAIL_HOST", default="")
+EMAIL_PORT = config("EMAIL_PORT", default=587, cast=int)
+EMAIL_HOST_USER = config("EMAIL_HOST_USER", default="")
+EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD", default="")
+EMAIL_USE_TLS = config("EMAIL_USE_TLS", default=True, cast=bool)
+# Full address of the website, used for links inside emails.
+SITE_URL = config("SITE_URL", default="http://127.0.0.1:8000")
 SUPPORT_PHONE = config("SUPPORT_PHONE", default="+91 20 4000 0000")
 
 # --- Messages -----------------------------------------------------------------

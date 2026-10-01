@@ -104,7 +104,9 @@
             <span>{% if order.bill_finalised %}<strong>Final bill</strong>{% else %}Estimated total{% endif %}</span>
             <strong>{{ order.total|rupees }}</strong>
           </div>
-          {% if order.bill_finalised %}<div class="text-muted">Estimate was {{ order.estimated_total|rupees }}</div>{% endif %}
+          {% if order.bill_finalised %}<div class="text-muted">Estimate was {{ order.estimated_total|rupees }}</div>
+            <div class="mt-2">{% if order.payment %}<span class="badge text-bg-success">Paid</span> {{ order.payment.get_method_display }} · {{ order.payment.collected_by.first_name|default:order.payment.collected_by.phone }}{% else %}<span class="badge text-bg-secondary">Payment due on delivery</span>{% endif %}</div>
+            <a href="{% url 'payments:invoice' order.code %}" target="_blank" class="btn btn-sm btn-outline-primary mt-2"><i class="bi bi-file-earmark-pdf me-1"></i>Invoice</a>{% endif %}
         </div>
       </div>
     </div>
