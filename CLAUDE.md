@@ -23,8 +23,8 @@ and code must carry short WHY-comments that help in the viva.
 | Dynamic bits | HTMX (slot loading, status refresh); plain `fetch` only where HTMX doesn't fit |
 | Charts | Chart.js (CDN) |
 | Config | `.env` via `python-decouple`; `.env.example` committed, `.env` git-ignored |
-| Payments | Razorpay **test mode** (`razorpay` SDK) + Cash on Delivery |
-| PDF invoices | `xhtml2pdf` (pure Python, works on Windows without GTK) |
+| Payments | **Cash on Delivery only** (cash or UPI to the agent). Razorpay dropped by user decision (2026-10-01). |
+| PDF invoices | `reportlab` (pure Python; xhtml2pdf dropped: heavy deps on Py 3.14). PDFs use `Rs.` (no ₹ glyph in base fonts) |
 | QR codes | `qrcode` + Pillow |
 | Email | console backend in development |
 | Tests | Django `TestCase` (`python manage.py test`) |
@@ -77,6 +77,14 @@ and code must carry short WHY-comments that help in the viva.
   Delivery Agent of the order's store), `assign_delivery_agent` (Ready only), `confirm_pickup` (pickup count →
   Picked Up), `start_delivery` (→ Out for Delivery), `confirm_delivery` (delivery count, mismatch needs confirm →
   Delivered). `agent_jobs(agent, day)` includes overdue jobs. Tests: give orders an agent before moving them.
+- Payments (`payments` app): `Payment` (OneToOne order; cash/upi; collected_by agent). `confirm_delivery` requires
+  `payment_method` when `amount_due > 0` and records count + payment + Delivered in ONE transaction.
+  Invoice PDF: `payments.invoice.build_invoice_pdf` (lines = garments at base price; express/discount in totals);
+  `/payments/invoice/<code>/` for owner customer, staff of the store, admin; only when `bill_finalised`.
+  Escape all user text with `django.utils.html.escape` inside ReportLab Paragraphs.
+- Emails: `orders.notifications.send_order_email(order_id, status)` via `transaction.on_commit` from
+  `change_status` and `create_order`; skipped if customer has no email; failures are logged, never raised;
+  Delivered email attaches the invoice. Links use `SITE_URL`.
 - Address chosen from served `ServiceArea`s; `Order.address_snapshot` keeps the address as on booking day.
 
 ## 3a. Portability rule (MANDATORY every phase)
@@ -125,7 +133,7 @@ Verify `setup.bat` still works on a fresh copy (no `venv`, no `.env`) when it ch
 
 ## 6. Status
 - [x] Phase 0  - [x] Phase 1  - [x] Phase 2  - [x] Phase 3  - [x] Phase 4
-- [x] Phase 5  - [ ] Phase 6  - [ ] Phase 7  - [ ] Phase 8  - [ ] Phase 9
+- [x] Phase 5  - [x] Phase 6  - [ ] Phase 7  - [ ] Phase 8  - [ ] Phase 9
 
 ## 7. Common commands (filled in as we go)
 ```

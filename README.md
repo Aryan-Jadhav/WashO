@@ -145,6 +145,7 @@ WashO/
 ├── orders/         Booking, pickup slots + capacity, coupons, orders, status history (PL/pgSQL trigger)
 ├── tagging/        Staff panel: garment tagging + QR codes, damage photos, counts, mismatch alerts
 ├── delivery/       Agent panel (My jobs): pickups & deliveries with garment counts; agent assignment
+├── payments/       Cash on Delivery collection, PDF invoices
 ├── media/          Uploaded photos (created automatically, not in Git)
 ├── templates/      HTML templates (base layout + one folder per app)
 ├── static/         CSS and images
@@ -155,6 +156,11 @@ WashO/
 ├── requirements.txt  Exact package versions
 └── .env.example    Template for the .env settings file
 ```
+
+## Emails
+While developing, every email (booking, each status change, delivery with the PDF invoice attached)
+is **printed in the WashO window** instead of being sent. Customers without an email address get none.
+To send real emails, see the `EMAIL_...` lines in `.env.example`.
 
 ## User roles
 | Role | How the account is created |
