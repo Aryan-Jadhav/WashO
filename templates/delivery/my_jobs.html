@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}My jobs{% endblock %}
+
+{% block content %}
+<div class="container py-4" style="max-width: 760px;">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+      <h2 class="mb-0"><i class="bi bi-truck text-primary me-2"></i>My jobs</h2>
+      <div class="small text-muted">{{ user.store.name|default:"No store linked" }} · {{ done_today }} done today</div>
+    </div>
+  </div>
+
+  {% if no_store %}
+    <div class="alert alert-warning">Your account isn't linked to a store yet. Please ask the admin to set "Works at".</div>
+  {% endif %}
+
+  {# Day switcher: jobs up to the chosen day (overdue ones stay visible) #}
+  <div class="d-flex align-items-center justify-content-between bg-soft rounded-3 p-2 mb-4">
+    <a class="btn btn-sm btn-outline-primary" href="?day={{ prev_day.isoformat }}" aria-label="Previous day"><i class="bi bi-chevron-left"></i></a>
+    <strong>{% if day == today %}Today, {% endif %}{{ day|date:"D, d M Y" }}</strong>
+    <a class="btn btn-sm btn-outline-primary" href="?day={{ next_day.isoformat }}" aria-label="Next day"><i class="bi bi-chevron-right"></i></a>
+  </div>
+
+  <h5 class="mb-2"><i class="bi bi-box-arrow-in-down me-2 text-primary"></i>Pickups <span class="badge text-bg-primary">{{ pickups|length }}</span></h5>
+  {% for o in pickups %}{% include "delivery/_job_card.html" with kind="pickup" %}
+  {% empty %}<p class="text-muted small mb-4">No pickups.</p>{% endfor %}
+
+  <h5 class="mb-2 mt-4"><i class="bi bi-box-arrow-up me-2 text-primary"></i>Deliveries <span class="badge text-bg-primary">{{ deliveries|length }}</span></h5>
+  {% for o in deliveries %}{% include "delivery/_job_card.html" with kind="delivery" %}
+  {% empty %}<p class="text-muted small mb-4">No deliveries.</p>{% endfor %}
+
+  {% if to_store %}
+  <h5 class="mb-2 mt-4"><i class="bi bi-shop me-2 text-primary"></i>Hand over at store <span class="badge text-bg-secondary">{{ to_store|length }}</span></h5>
+  <p class="small text-muted">Picked up by you, waiting for store staff to mark them received.</p>
+  {% for o in to_store %}{% include "delivery/_job_card.html" with kind="store" %}{% endfor %}
+  {% endif %}
+</div>
+{% endblock %}

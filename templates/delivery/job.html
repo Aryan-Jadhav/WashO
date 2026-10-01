@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% load money order_tags %}
+{% block title %}{{ order.code }} · Job{% endblock %}
+
+{% block content %}
+<div class="container py-4" style="max-width: 760px;">
+  <a href="{% url 'delivery:my_jobs' %}" class="small"><i class="bi bi-arrow-left"></i> My jobs</a>
+  <div class="d-flex justify-content-between align-items-center mt-2 mb-3">
+    <h3 class="mb-0">{{ order.code }} {% if order.is_express %}<i class="bi bi-lightning-charge-fill text-warning" title="Express"></i>{% endif %}</h3>
+    <span class="badge fs-6 text-bg-{{ order.status|status_colour }}">{{ order.get_status_display }}</span>
+  </div>
+
+  <!-- Customer & address -->
+  <div class="card border-0 shadow-sm mb-3">
+    <div class="card-body">
+      <h5 class="mb-2">{{ order.customer.get_full_name|default:"Customer" }}</h5>
+      <p class="mb-2"><i class="bi bi-geo-alt me-2 text-primary"></i>{{ order.address_snapshot }}</p>
+      {% if order.customer_note %}<p class="small mb-2"><i class="bi bi-chat-left-text me-2 text-primary"></i>{{ order.customer_note }}</p>{% endif %}
+      <div class="d-flex flex-wrap gap-2">
+        <a href="tel:{{ order.customer.phone }}" class="btn btn-success"><i class="bi bi-telephone me-1"></i>Call {{ order.customer.phone }}</a>
+        <a href="https://www.google.com/maps/search/?api=1&amp;query={{ order.address_snapshot|urlencode }}" target="_blank" rel="noopener" class="btn btn-outline-primary"><i class="bi bi-map me-1"></i>Directions</a>
+      </div>
+    </div>
+  </div>
+
+  {% if is_pickup %}
+  <!-- PICKUP -->
+  <div class="card border-0 shadow-sm mb-3 border-start border-4 border-primary">
+    <div class="card-body">
+      <h5><i class="bi bi-box-arrow-in-down me-2 text-primary"></i>Pickup · {{ order.pickup_slot.date|date:"D d M" }}, {{ order.pickup_slot.time_slot }}</h5>
+      <p class="small text-muted mb-2">Customer's estimate:</p>
+      <ul class="small mb-3">
+        {% for i in items %}<li>{{ i.item.name }} ({{ i.category.name }}) × {{ i.quantity }}</li>{% endfor %}
+      </ul>
+      <p class="small"><strong>Count every garment together with the customer</strong> before you leave. This number is checked again at the store.</p>
+      <form method="post" action="{% url 'delivery:job_pickup' order.code %}" novalidate>
+        {% csrf_token %}
+        {% include "partials/_form.html" with form=pickup_form %}
+        <button type="submit" class="btn btn-primary btn-lg w-100"><i class="bi bi-check2-circle me-1"></i>Confirm pickup</button>
+      </form>
+    </div>
+  </div>
+  {% endif %}
+
+  {% if is_delivery %}
+  <!-- DELIVERY -->
+  <div class="card border-0 shadow-sm mb-3 border-start border-4 border-warning">
+    <div class="card-body">
+      <h5><i class="bi bi-box-arrow-up me-2 text-warning"></i>Delivery · {{ order.delivery_date|date:"D d M" }}</h5>
+      <p class="mb-2">Garments tagged at store: <strong class="fs-5">{{ expected_delivery|default:"–" }}</strong></p>
+      <p class="mb-3">Amount: <strong>{{ order.total|rupees }}</strong> <span class="small text-muted">(payment collection is added in Phase 6)</span></p>
+
+      {% if order.status == "ready" %}
+        <p class="small">Collect the packed order from <strong>{{ order.store.name }}</strong>, then tap below.</p>
+        <form method="post" action="{% url 'delivery:job_start_delivery' order.code %}">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-warning btn-lg w-100"><i class="bi bi-truck me-1"></i>Collected. Start delivery</button>
+        </form>
+      {% else %}
+        <p class="small"><strong>Count the garments with the customer</strong> while handing them over.</p>
+        <form method="post" action="{% url 'delivery:job_deliver' order.code %}" novalidate>
+          {% csrf_token %}
+          {% if delivery_form.non_field_errors %}<div class="alert alert-danger py-2 small">{% for e in delivery_form.non_field_errors %}<div>{{ e }}</div>{% endfor %}</div>{% endif %}
+          <div class="mb-3">
+            <label class="form-label" for="{{ delivery_form.count.id_for_label }}">{{ delivery_form.count.label }} <span class="text-danger">*</span></label>
+            {{ delivery_form.count }}
+            {% for e in delivery_form.count.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+          </div>
+          {% if delivery_form.non_field_errors %}
+          <div class="form-check mb-3">{{ delivery_form.confirm_mismatch }}<label class="form-check-label small" for="{{ delivery_form.confirm_mismatch.id_for_label }}">{{ delivery_form.confirm_mismatch.label }}</label></div>
+          {% endif %}
+          <div class="mb-3">
+            <label class="form-label" for="{{ delivery_form.note.id_for_label }}">{{ delivery_form.note.label }}</label>
+            {{ delivery_form.note }}
+          </div>
+          <button type="submit" class="btn btn-success btn-lg w-100"><i class="bi bi-house-check me-1"></i>Confirm delivery</button>
+        </form>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+
+  {% if not is_pickup and not is_delivery %}
+    <div class="alert alert-light border">Nothing to do on this order right now.
+      {% if order.status == "picked_up" %}Hand the garments over at {{ order.store.name }}.{% endif %}</div>
+  {% endif %}
+
+  <div class="small text-muted">
+    Counts: pickup {{ pickup_count|default:"–" }} · store {{ store_count|default:"–" }}
+  </div>
+</div>
+{% endblock %}

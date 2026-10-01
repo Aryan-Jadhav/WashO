@@ -1,0 +1,25 @@
+{% load order_tags %}
+<a href="{% url 'delivery:job' o.code %}" class="card border-0 shadow-sm mb-3 text-reset text-decoration-none order-card">
+  <div class="card-body">
+    <div class="d-flex justify-content-between align-items-start gap-2">
+      <div>
+        <div class="fw-semibold">{{ o.code }} {% if o.is_express %}<i class="bi bi-lightning-charge-fill text-warning" title="Express"></i>{% endif %}</div>
+        <div class="small">{{ o.customer.get_full_name|default:"Customer" }} · {{ o.customer.phone }}</div>
+        <div class="small text-muted">{{ o.address_snapshot|truncatechars:70 }}</div>
+      </div>
+      <span class="badge text-bg-{{ o.status|status_colour }}">{{ o.get_status_display }}</span>
+    </div>
+    <div class="small mt-2">
+      {% if kind == "pickup" %}
+        <i class="bi bi-clock me-1 text-primary"></i>{{ o.pickup_slot.date|date:"D d M" }}, {{ o.pickup_slot.time_slot }}
+        {% if o.pickup_slot.date < today %}<span class="badge text-bg-danger ms-1">Overdue</span>{% endif %}
+      {% elif kind == "delivery" %}
+        <i class="bi bi-calendar-check me-1 text-primary"></i>Deliver {{ o.delivery_date|date:"D d M" }}
+        {% if o.status == "ready" %}· collect from {{ o.store.name }}{% endif %}
+        {% if o.delivery_date < today %}<span class="badge text-bg-danger ms-1">Overdue</span>{% endif %}
+      {% else %}
+        <i class="bi bi-shop me-1 text-primary"></i>Hand over at {{ o.store.name }}
+      {% endif %}
+    </div>
+  </div>
+</a>
