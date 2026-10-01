@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Store locator{% endblock %}
+{% block meta_description %}Find a WashO laundry store near you and check if we pick up from your pincode.{% endblock %}
+
+{% block content %}
+<section class="page-header py-5">
+  <div class="container">
+    <h1 class="fw-bold">Find a store</h1>
+    <p class="lead mb-0">Search by area or pincode to see if we pick up from your doorstep.</p>
+  </div>
+</section>
+
+<section class="py-4">
+  <div class="container">
+    <form method="get" action="{% url 'stores:locator' %}" class="row g-2 align-items-end mb-4"
+          hx-get="{% url 'stores:locator' %}" hx-target="#store-results" hx-push-url="true"
+          hx-trigger="change from:#id_city, submit">
+      <div class="col-sm-4 col-lg-3">
+        <label class="form-label" for="id_city">City</label>
+        {{ form.city }}
+      </div>
+      <div class="col-sm-5 col-lg-5">
+        <label class="form-label" for="id_q">Area or pincode</label>
+        {{ form.q }}
+      </div>
+      <div class="col-sm-3 col-lg-2 d-grid">
+        <button type="submit" class="btn btn-primary"><i class="bi bi-geo-alt me-1"></i>Search</button>
+      </div>
+    </form>
+
+    <div id="store-results">
+      {% include "stores/_store_results.html" %}
+    </div>
+  </div>
+</section>
+{% endblock %}

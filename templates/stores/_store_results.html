@@ -1,0 +1,63 @@
+{% if form.errors %}
+  <div class="alert alert-danger">
+    {% for field, errors in form.errors.items %}{% for e in errors %}<div>{{ e }}</div>{% endfor %}{% endfor %}
+  </div>
+{% endif %}
+
+{# Pincode check: tell the customer clearly whether we serve them. #}
+{% if pincode %}
+  {% if matched_areas %}
+    <div class="alert alert-success d-flex gap-3">
+      <i class="bi bi-check-circle-fill fs-4"></i>
+      <div>
+        <strong>Great news! We pick up from {{ pincode }}.</strong><br>
+        {% for a in matched_areas %}
+          {{ a.name }} is served by <strong>{{ a.store.name }}</strong>{% if not forloop.last %}; {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+  {% else %}
+    <div class="alert alert-warning d-flex gap-3">
+      <i class="bi bi-exclamation-triangle-fill fs-4"></i>
+      <div><strong>Sorry, we don't serve pincode {{ pincode }} yet.</strong><br>
+        We're expanding soon. <a href="{% url 'core:contact' %}">Tell us</a> you'd like WashO in your area.</div>
+    </div>
+  {% endif %}
+{% endif %}
+
+<div class="row g-4">
+  {% for s in stores %}
+  <div class="col-md-6 col-lg-4">
+    <div class="card h-100 border-0 shadow-sm">
+      <div class="card-body">
+        <h5 class="card-title"><i class="bi bi-shop text-primary me-2"></i>{{ s.name }}</h5>
+        <p class="small mb-2"><i class="bi bi-geo-alt me-2 text-muted"></i>{{ s.address }}, {{ s.locality }}, {{ s.city.name }} – {{ s.pincode }}</p>
+        <p class="small mb-2"><i class="bi bi-telephone me-2 text-muted"></i><a href="tel:{{ s.phone|cut:' '|cut:'-' }}">{{ s.phone }}</a></p>
+        <p class="small mb-3"><i class="bi bi-clock me-2 text-muted"></i>{{ s.opening_time|time:"g:i A" }} – {{ s.closing_time|time:"g:i A" }}, all days</p>
+        {% if s.active_areas %}
+          <div class="small text-muted mb-1">Pickup &amp; delivery areas:</div>
+          <div class="d-flex flex-wrap gap-1">
+            {% for a in s.active_areas %}
+              <span class="badge rounded-pill text-bg-light border {% if a.pincode == pincode %}border-success text-success{% endif %}">{{ a.name }} · {{ a.pincode }}</span>
+            {% endfor %}
+          </div>
+        {% endif %}
+      </div>
+      {% if s.map_url %}
+      <div class="card-footer bg-white border-0 pb-3">
+        <a href="{{ s.map_url }}" target="_blank" rel="noopener" class="btn btn-outline-primary btn-sm">
+          <i class="bi bi-map me-1"></i>Open in Google Maps
+        </a>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+  {% empty %}
+    {% if not form.errors and not pincode %}
+    <div class="col-12 text-center text-muted py-5">
+      <i class="bi bi-shop display-6"></i>
+      <p class="mt-2">No stores match your search. Try another area or pincode.</p>
+    </div>
+    {% endif %}
+  {% endfor %}
+</div>
