@@ -38,6 +38,12 @@
                 <li><a class="dropdown-item" href="{% url 'orders:list' %}"><i class="bi bi-bag me-2"></i>My orders</a></li>
                 <li><a class="dropdown-item" href="{% url 'accounts:address_list' %}"><i class="bi bi-geo-alt me-2"></i>My addresses</a></li>
               {% endif %}
+              {% if user.is_store_staff or user.is_admin_role %}
+                <li><a class="dropdown-item" href="{% url 'tagging:panel' %}"><i class="bi bi-shop me-2"></i>Staff panel</a></li>
+              {% endif %}
+              {% if user.is_admin_role %}
+                <li><a class="dropdown-item" href="{% url 'tagging:alerts' %}"><i class="bi bi-exclamation-triangle me-2"></i>Mismatch alerts</a></li>
+              {% endif %}
               {% if user.is_staff %}
                 <li><a class="dropdown-item" href="{% url 'admin:index' %}"><i class="bi bi-gear me-2"></i>Admin site</a></li>
               {% endif %}

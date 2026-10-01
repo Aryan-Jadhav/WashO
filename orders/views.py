@@ -130,6 +130,9 @@ def order_detail(request, code):
                               code=code)
     ctx = _status_context(order)
     ctx["cancel_form"] = CancelOrderForm()
+    # Transparency: the customer sees every garment we tagged and the count at each step.
+    ctx["garments"] = order.garments.select_related("category", "item")
+    ctx["count_checks"] = order.count_checks.all()
     return render(request, "orders/order_detail.html", ctx)
 
 

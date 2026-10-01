@@ -30,6 +30,7 @@ INSTALLED_APPS = [
     "catalog",
     "stores",
     "orders",
+    "tagging",
 ]
 
 MIDDLEWARE = [
@@ -107,6 +108,9 @@ STATIC_ROOT = BASE_DIR / "staticfiles"  # used only by `collectstatic` when depl
 
 MEDIA_URL = "media/"
 MEDIA_ROOT = BASE_DIR / "media"  # uploaded files (e.g. damage photos)
+# Uploads bigger than this are rejected before reaching our code (photos are checked again at 5 MB).
+DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024
+FILE_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024
 
 # --- Email --------------------------------------------------------------------
 # In development emails are printed in the terminal instead of being really sent.

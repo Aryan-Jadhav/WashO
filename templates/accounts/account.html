@@ -30,14 +30,17 @@
       {% if user.is_admin_role %}
         <div class="card border-0 shadow-sm mb-3"><div class="card-body">
           <h5><i class="bi bi-shield-lock me-2 text-primary"></i>Admin</h5>
-          <p class="text-muted small">Manage master data (users, roles, FAQs, contact messages) in the admin site. The dashboard with charts comes in Phase 7.</p>
+          <p class="text-muted small">Manage master data in the admin site, follow all stores in the staff panel and review garment-count mismatch alerts. The dashboard with charts comes in Phase 7.</p>
           <a href="{% url 'admin:index' %}" class="btn btn-primary btn-sm">Open admin site</a>
+          <a href="{% url 'tagging:panel' %}" class="btn btn-outline-primary btn-sm">Staff panel</a>
+          <a href="{% url 'tagging:alerts' %}" class="btn btn-outline-danger btn-sm">Mismatch alerts</a>
         </div></div>
       {% endif %}
       {% if user.is_store_staff %}
         <div class="card border-0 shadow-sm mb-3"><div class="card-body">
           <h5><i class="bi bi-shop me-2 text-primary"></i>Store staff panel</h5>
-          <p class="text-muted small mb-0">Incoming orders and the garment tagging screen will appear here (Phase 4).</p>
+          <p class="text-muted small">Incoming orders, garment tagging with QR codes, and status updates.</p>
+          <a href="{% url 'tagging:panel' %}" class="btn btn-primary btn-sm">Open staff panel</a>
         </div></div>
       {% endif %}
       {% if user.is_delivery_agent %}

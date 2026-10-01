@@ -22,6 +22,7 @@ urlpatterns = [
     path("prices/", include("catalog.urls")),
     path("stores/", include("stores.urls")),
     path("orders/", include("orders.urls")),
+    path("staff/", include("tagging.urls")),
     path("", include("core.urls")),
 ]
 
