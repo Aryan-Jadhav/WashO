@@ -46,7 +46,8 @@
       {% if user.is_delivery_agent %}
         <div class="card border-0 shadow-sm mb-3"><div class="card-body">
           <h5><i class="bi bi-truck me-2 text-primary"></i>Delivery agent panel</h5>
-          <p class="text-muted small mb-0">Today's pickups and deliveries will appear here (Phase 5).</p>
+          <p class="text-muted small">Today's pickups and deliveries, with garment counts at the door.</p>
+          <a href="{% url 'delivery:my_jobs' %}" class="btn btn-primary btn-sm">Open my jobs</a>
         </div></div>
       {% endif %}
       {% if user.is_customer %}

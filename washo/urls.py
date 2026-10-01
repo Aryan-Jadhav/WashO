@@ -23,6 +23,7 @@ urlpatterns = [
     path("stores/", include("stores.urls")),
     path("orders/", include("orders.urls")),
     path("staff/", include("tagging.urls")),
+    path("agent/", include("delivery.urls")),
     path("", include("core.urls")),
 ]
 

@@ -101,7 +101,8 @@ def slot_options(request):
 
 
 def _my_orders(user):
-    return Order.objects.filter(customer=user).select_related("pickup_slot__time_slot", "store")
+    return Order.objects.filter(customer=user).select_related("pickup_slot__time_slot", "store", "pickup_agent",
+                                                              "delivery_agent")
 
 
 @role_required(Role.CUSTOMER)

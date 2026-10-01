@@ -38,6 +38,9 @@
                 <li><a class="dropdown-item" href="{% url 'orders:list' %}"><i class="bi bi-bag me-2"></i>My orders</a></li>
                 <li><a class="dropdown-item" href="{% url 'accounts:address_list' %}"><i class="bi bi-geo-alt me-2"></i>My addresses</a></li>
               {% endif %}
+              {% if user.is_delivery_agent %}
+                <li><a class="dropdown-item" href="{% url 'delivery:my_jobs' %}"><i class="bi bi-truck me-2"></i>My jobs</a></li>
+              {% endif %}
               {% if user.is_store_staff or user.is_admin_role %}
                 <li><a class="dropdown-item" href="{% url 'tagging:panel' %}"><i class="bi bi-shop me-2"></i>Staff panel</a></li>
               {% endif %}

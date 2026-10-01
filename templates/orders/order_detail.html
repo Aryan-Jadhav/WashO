@@ -93,6 +93,8 @@
           <p class="mb-2"><i class="bi bi-calendar-event me-2 text-primary"></i>{{ order.pickup_slot.date|date:"l, d M Y" }}, {{ order.pickup_slot.time_slot }}</p>
           <p class="mb-2"><i class="bi bi-geo-alt me-2 text-primary"></i>{{ order.address_snapshot }}</p>
           <p class="mb-2"><i class="bi bi-shop me-2 text-primary"></i>{{ order.store.name }} · {{ order.store.phone }}</p>
+          {% if order.pickup_agent and order.status == "pickup_assigned" %}<p class="mb-2"><i class="bi bi-person-badge me-2 text-primary"></i>Pickup by {{ order.pickup_agent.first_name|default:"our agent" }} · <a href="tel:{{ order.pickup_agent.phone }}">{{ order.pickup_agent.phone }}</a></p>{% endif %}
+          {% if order.delivery_agent and order.status == "ready" or order.delivery_agent and order.status == "out_for_delivery" %}<p class="mb-2"><i class="bi bi-person-badge me-2 text-primary"></i>Delivery by {{ order.delivery_agent.first_name|default:"our agent" }} on {{ order.delivery_date|date:"D d M" }} · <a href="tel:{{ order.delivery_agent.phone }}">{{ order.delivery_agent.phone }}</a></p>{% endif %}
           {% if order.customer_note %}<p class="mb-0"><i class="bi bi-chat-left-text me-2 text-primary"></i>{{ order.customer_note }}</p>{% endif %}
         </div>
       </div>

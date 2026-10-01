@@ -96,8 +96,9 @@ class OrderAdmin(admin.ModelAdmin):
     # which checks the allowed order of statuses. Use the actions above instead.
     readonly_fields = ["code", "customer", "address", "address_snapshot", "store", "pickup_slot", "status",
                        "coupon", "estimated_total", "subtotal", "express_charge", "discount", "total",
-                       "bill_finalised", "created_at", "updated_at"]
-    fields = ["code", "status", "customer", "address_snapshot", "store", "pickup_slot", "is_express",
+                       "bill_finalised", "created_at", "updated_at", "pickup_agent", "delivery_agent", "delivery_date"]
+    fields = ["code", "status", "customer", "address_snapshot", "store", "pickup_slot", "pickup_agent",
+              "delivery_agent", "delivery_date", "is_express",
               "coupon", "estimated_total", "subtotal", "express_charge", "discount", "total",
               "bill_finalised", "customer_note", "created_at", "updated_at"]
 
