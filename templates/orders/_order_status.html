@@ -1,0 +1,39 @@
+{% load order_tags %}
+{#
+  Live status: while the order is open, HTMX re-fetches this block every 15 seconds
+  and replaces it (hx-swap="outerHTML"). No page reload, no custom JavaScript.
+#}
+<div id="order-status" class="card border-0 shadow-sm mb-4"
+     {% if order.is_open %}hx-get="{% url 'orders:status_partial' order.code %}" hx-trigger="every 15s" hx-swap="outerHTML"{% endif %}>
+  <div class="card-body p-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h5 class="mb-0">Order status</h5>
+      <span class="badge fs-6 text-bg-{{ order.status|status_colour }}">{{ order.get_status_display }}</span>
+    </div>
+
+    {% if order.status == "cancelled" %}
+      <div class="alert alert-danger mb-3"><i class="bi bi-x-circle me-1"></i>This order was cancelled.</div>
+    {% else %}
+      <div class="status-track mb-4">
+        {% for step in steps %}
+          <div class="status-step {% if step.done %}done{% endif %} {% if step.current %}current{% endif %}">
+            <div class="dot">{% if step.done and not step.current %}<i class="bi bi-check"></i>{% endif %}</div>
+            <div class="lbl">{{ step.label }}</div>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <h6 class="text-muted small text-uppercase">History</h6>
+    <ul class="list-unstyled small mb-0 timeline">
+      {% for h in history %}
+        <li>
+          <strong>{{ h.to_label }}</strong>
+          <span class="text-muted">· {{ h.changed_at|date:"d M Y, g:i A" }}</span>
+          {% if h.note %}<div class="text-muted">{{ h.note }}</div>{% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+    {% if order.is_open %}<div class="small text-muted mt-3"><i class="bi bi-arrow-repeat"></i> Updates automatically</div>{% endif %}
+  </div>
+</div>

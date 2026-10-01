@@ -1,0 +1,37 @@
+{% load money %}
+{% if form.non_field_errors %}
+  <div class="alert alert-danger small py-2">{% for e in form.non_field_errors %}<div>{{ e }}</div>{% endfor %}</div>
+{% endif %}
+
+{% if quote.lines %}
+  <ul class="list-unstyled small mb-3">
+    {% for line in quote.lines %}
+      <li class="d-flex justify-content-between py-1 border-bottom">
+        <span>{{ line.item.name }} <span class="text-muted">({{ line.category.name }}) × {{ line.quantity }}</span></span>
+        <span>{{ line.amount|rupees }}</span>
+      </li>
+    {% endfor %}
+  </ul>
+  <dl class="row small mb-0">
+    <dt class="col-7 fw-normal">Items ({{ quote.piece_count }} pcs)</dt><dd class="col-5 text-end mb-1">{{ quote.subtotal|rupees }}</dd>
+    {% if quote.is_express %}
+      <dt class="col-7 fw-normal">Express charge</dt><dd class="col-5 text-end mb-1">{{ quote.express_charge|rupees }}</dd>
+    {% endif %}
+    {% if quote.discount %}
+      <dt class="col-7 fw-normal text-success">Coupon {{ quote.coupon.code }}</dt><dd class="col-5 text-end text-success mb-1">−{{ quote.discount|rupees }}</dd>
+    {% endif %}
+    <dt class="col-7 fw-normal">Pickup &amp; delivery</dt><dd class="col-5 text-end text-success mb-1">Free</dd>
+    <dt class="col-7 fs-5 pt-2 border-top">Estimated total</dt><dd class="col-5 text-end fs-5 fw-bold pt-2 border-top mb-0">{{ quote.total|rupees }}</dd>
+  </dl>
+  {% if quote.is_express and not quote.has_express_lines %}
+    <p class="small text-warning mt-2 mb-0"><i class="bi bi-info-circle"></i> Express isn't available for the services you chose.</p>
+  {% endif %}
+{% else %}
+  <p class="text-muted small mb-0"><i class="bi bi-basket me-1"></i>Add items to see your estimate.</p>
+{% endif %}
+
+{% if quote.coupon_error %}
+  <p class="small text-danger mt-2 mb-0"><i class="bi bi-x-circle"></i> {{ quote.coupon_error }}</p>
+{% elif quote.coupon %}
+  <p class="small text-success mt-2 mb-0"><i class="bi bi-check-circle"></i> Coupon applied: {{ quote.coupon.description }}</p>
+{% endif %}

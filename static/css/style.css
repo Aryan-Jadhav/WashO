@@ -57,3 +57,35 @@ body { background: #fff; color: #1f2937; }
 @media (max-width: 575.98px) {
   .display-5 { font-size: 2rem; }
 }
+
+/* ---------- Phase 3: booking & orders ---------- */
+.step-num {
+  display: inline-grid; place-items: center; width: 28px; height: 28px; margin-right: .5rem;
+  border-radius: 50%; background: var(--wo-primary); color: #fff; font-size: .9rem;
+}
+.choice-card {
+  display: flex; gap: .75rem; align-items: flex-start; padding: .75rem 1rem; cursor: pointer;
+  border: 1px solid #dee2e6; border-radius: .75rem; font-size: .9rem;
+}
+.choice-card:has(input:checked) { border-color: var(--wo-primary); background: var(--wo-soft); }
+.choice-card input { margin-top: .2rem; flex-shrink: 0; }
+.item-row:last-child { border-bottom: 0 !important; }
+.slot-btn { min-width: 150px; line-height: 1.2; }
+.order-card:hover { box-shadow: 0 .5rem 1rem rgba(13, 110, 253, .12) !important; }
+
+/* Status progress bar: a row of dots that wraps on small screens. */
+.status-track { display: flex; flex-wrap: wrap; gap: .25rem 0; }
+.status-step { flex: 1 0 80px; text-align: center; position: relative; }
+.status-step .dot {
+  width: 26px; height: 26px; margin: 0 auto .25rem; border-radius: 50%;
+  display: grid; place-items: center; background: #e9ecef; color: #fff; font-size: .9rem;
+}
+.status-step.done .dot { background: var(--wo-accent); }
+.status-step.current .dot { background: var(--wo-primary); box-shadow: 0 0 0 4px rgba(13, 110, 253, .2); }
+.status-step .lbl { font-size: .7rem; color: #6c757d; }
+.status-step.current .lbl { color: var(--wo-primary); font-weight: 600; }
+.timeline li { border-left: 2px solid #e9ecef; padding: 0 0 .6rem .8rem; position: relative; }
+.timeline li::before {
+  content: ""; position: absolute; left: -6px; top: 4px; width: 10px; height: 10px;
+  border-radius: 50%; background: var(--wo-primary);
+}

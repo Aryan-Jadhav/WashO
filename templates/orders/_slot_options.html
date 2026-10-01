@@ -1,0 +1,17 @@
+{# Slot buttons. Full or already-started slots are disabled, so they can't be picked. #}
+<div class="d-flex flex-wrap gap-2">
+  {% for s in slots %}
+    {% with pk=s.slot.pk|stringformat:"s" %}
+    <input type="radio" class="btn-check" name="time_slot" id="slot{{ pk }}" value="{{ pk }}" autocomplete="off"
+           {% if s.is_full or s.is_past %}disabled{% elif selected_slot == pk %}checked{% endif %}>
+    <label class="btn btn-outline-primary slot-btn" for="slot{{ pk }}">
+      {{ s.slot }}<br>
+      <small>
+        {% if s.is_past %}Not available{% elif s.is_full %}Full{% else %}{{ s.remaining }} left{% endif %}
+      </small>
+    </label>
+    {% endwith %}
+  {% empty %}
+    <p class="text-muted small mb-0">No pickup slots are set up.</p>
+  {% endfor %}
+</div>

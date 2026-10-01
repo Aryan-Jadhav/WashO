@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+{% block title %}Book a pickup{% endblock %}
+
+{% block content %}
+<div class="container py-4 py-lg-5">
+  <h2 class="mb-1">Book a pickup</h2>
+  <p class="text-muted mb-4">Give us an approximate count. We'll count every garment at pickup and make the final bill at the store.</p>
+
+  {#
+    The whole page is ONE normal form (works without JavaScript).
+    HTMX extras: on any change it posts to book_estimate and swaps in the new price summary,
+    and the slot list reloads when the date or address changes.
+  #}
+  <form method="post" id="booking-form" novalidate
+        hx-post="{% url 'orders:book_estimate' %}" hx-target="#estimate"
+        hx-trigger="change, input delay:500ms">
+    {% csrf_token %}
+
+    {% if form.non_field_errors %}
+      <div class="alert alert-danger">{% for e in form.non_field_errors %}<div>{{ e }}</div>{% endfor %}</div>
+    {% endif %}
+
+    <div class="row g-4">
+      <div class="col-lg-8">
+
+        <!-- 1. Address -->
+        <div class="card border-0 shadow-sm mb-4">
+          <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h5 class="mb-0"><span class="step-num">1</span>Pickup address</h5>
+              <a href="{% url 'accounts:address_create' %}?next={% url 'orders:book' %}" class="small"><i class="bi bi-plus"></i> Add new</a>
+            </div>
+            <div id="address-choices" class="d-grid gap-2">
+              {% for radio in form.address %}
+                <label class="choice-card" for="{{ radio.id_for_label }}">
+                  {{ radio.tag }}
+                  <span>{{ radio.choice_label }}</span>
+                </label>
+              {% endfor %}
+            </div>
+            {% for e in form.address.errors %}<div class="text-danger small mt-1">{{ e }}</div>{% endfor %}
+          </div>
+        </div>
+
+        <!-- 2. Items -->
+        <div class="card border-0 shadow-sm mb-4">
+          <div class="card-body p-4">
+            <h5 class="mb-3"><span class="step-num">2</span>What should we pick up?</h5>
+            <div class="accordion" id="itemsAccordion">
+              {% for category, rows in form.item_groups %}
+              <div class="accordion-item">
+                <h2 class="accordion-header">
+                  <button class="accordion-button {% if not forloop.first %}collapsed{% endif %}" type="button"
+                          data-bs-toggle="collapse" data-bs-target="#cat{{ category.pk }}">
+                    <i class="bi bi-{{ category.icon }} text-primary me-2"></i>{{ category.name }}
+                    {% if category.express_available %}<span class="badge text-bg-light border ms-2 small fw-normal">Express +{{ category.express_surcharge_percent|floatformat:"-2" }}%</span>{% endif %}
+                  </button>
+                </h2>
+                <div id="cat{{ category.pk }}" class="accordion-collapse collapse {% if forloop.first %}show{% endif %}">
+                  <div class="accordion-body p-2">
+                    {% for price, field in rows %}
+                    <div class="d-flex align-items-center justify-content-between py-1 px-2 border-bottom item-row">
+                      <label for="{{ field.id_for_label }}" class="small flex-grow-1">
+                        {{ price.item.name }}
+                        <span class="text-muted">· ₹{{ price.price|floatformat:"-2" }} {{ price.item.get_unit_display }}</span>
+                      </label>
+                      <div style="width: 84px;">{{ field }}</div>
+                    </div>
+                    {% for e in field.errors %}<div class="text-danger small px-2">{{ e }}</div>{% endfor %}
+                    {% endfor %}
+                  </div>
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. Date & slot -->
+        <div class="card border-0 shadow-sm mb-4">
+          <div class="card-body p-4">
+            <h5 class="mb-3"><span class="step-num">3</span>Pickup date &amp; time</h5>
+            <div class="row g-3">
+              <div class="col-sm-5">
+                <label class="form-label" for="{{ form.pickup_date.id_for_label }}">Date</label>
+                {{ form.pickup_date }}
+                {% for e in form.pickup_date.errors %}<div class="text-danger small mt-1">{{ e }}</div>{% endfor %}
+              </div>
+            </div>
+            <label class="form-label mt-3">Time slot</label>
+            <div id="slot-options"
+                 hx-get="{% url 'orders:slot_options' %}"
+                 hx-trigger="change from:#id_pickup_date, change from:#address-choices"
+                 hx-include="[name='address'], [name='pickup_date'], [name='time_slot']"
+                 hx-target="this">
+              {% include "orders/_slot_options.html" %}
+            </div>
+            {% for e in form.time_slot.errors %}<div class="text-danger small mt-1">{{ e }}</div>{% endfor %}
+          </div>
+        </div>
+
+        <!-- 4. Extras -->
+        <div class="card border-0 shadow-sm mb-4">
+          <div class="card-body p-4">
+            <h5 class="mb-3"><span class="step-num">4</span>Extras</h5>
+            <div class="form-check form-switch mb-3">
+              {{ form.is_express }}
+              <label class="form-check-label" for="{{ form.is_express.id_for_label }}">
+                <i class="bi bi-lightning-charge-fill text-warning"></i> <strong>Express service</strong>,
+                faster delivery for an extra charge (not available for Shoe Cleaning &amp; Home Textiles)
+              </label>
+            </div>
+            <div class="row g-3">
+              <div class="col-sm-5">
+                <label class="form-label" for="{{ form.coupon_code.id_for_label }}">{{ form.coupon_code.label }}</label>
+                {{ form.coupon_code }}
+                {% for e in form.coupon_code.errors %}<div class="text-danger small mt-1">{{ e }}</div>{% endfor %}
+              </div>
+              <div class="col-sm-7">
+                <label class="form-label" for="{{ form.note.id_for_label }}">{{ form.note.label }}</label>
+                {{ form.note }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Summary -->
+      <div class="col-lg-4">
+        <div class="card border-0 shadow-sm sticky-lg-top" style="top: 90px;">
+          <div class="card-body p-4">
+            <h5 class="mb-3"><i class="bi bi-receipt me-2 text-primary"></i>Estimate</h5>
+            <div id="estimate">
+              {% include "orders/_estimate.html" %}
+            </div>
+            <button type="submit" class="btn btn-primary w-100 py-2 mt-3"><i class="bi bi-check2-circle me-1"></i>Confirm pickup</button>
+            <p class="small text-muted mt-2 mb-0">Pay after the final bill is ready: online or cash on delivery.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+{% endblock %}

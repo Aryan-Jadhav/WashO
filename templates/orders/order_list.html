@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% load money order_tags %}
+{% block title %}My orders{% endblock %}
+
+{% block content %}
+<div class="container py-5" style="max-width: 960px;">
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+    <h2 class="mb-0">My orders</h2>
+    <a href="{% url 'orders:book' %}" class="btn btn-primary"><i class="bi bi-calendar-plus me-1"></i>Book a pickup</a>
+  </div>
+
+  <ul class="nav nav-pills mb-3">
+    <li class="nav-item"><a class="nav-link {% if show != 'past' %}active{% endif %}" href="?show=active">Active</a></li>
+    <li class="nav-item"><a class="nav-link {% if show == 'past' %}active{% endif %}" href="?show=past">Delivered &amp; cancelled</a></li>
+  </ul>
+
+  {% for o in page %}
+    <a href="{% url 'orders:detail' o.code %}" class="card border-0 shadow-sm mb-3 text-reset text-decoration-none order-card">
+      <div class="card-body d-flex flex-wrap justify-content-between align-items-center gap-3">
+        <div>
+          <div class="fw-semibold">{{ o.code }} {% if o.is_express %}<i class="bi bi-lightning-charge-fill text-warning" title="Express"></i>{% endif %}</div>
+          <div class="small text-muted">Booked {{ o.created_at|date:"d M Y, g:i A" }}</div>
+          <div class="small"><i class="bi bi-truck me-1 text-primary"></i>Pickup {{ o.pickup_slot.date|date:"D, d M" }}, {{ o.pickup_slot.time_slot }}</div>
+        </div>
+        <div class="text-end">
+          <span class="badge text-bg-{{ o.status|status_colour }}">{{ o.get_status_display }}</span>
+          <div class="fw-semibold mt-1">{{ o.total|rupees }}</div>
+          <div class="small text-muted">{% if o.bill_finalised %}Final bill{% else %}Estimate{% endif %}</div>
+        </div>
+      </div>
+    </a>
+  {% empty %}
+    <div class="text-center text-muted py-5">
+      <i class="bi bi-bag display-6"></i>
+      <p class="mt-2">{% if show == 'past' %}No past orders yet.{% else %}No active orders. <a href="{% url 'orders:book' %}">Book a pickup</a>.{% endif %}</p>
+    </div>
+  {% endfor %}
+
+  {% if page.has_other_pages %}
+  <nav><ul class="pagination justify-content-center">
+    {% if page.has_previous %}<li class="page-item"><a class="page-link" href="?show={{ show }}&page={{ page.previous_page_number }}">Previous</a></li>{% endif %}
+    <li class="page-item disabled"><span class="page-link">Page {{ page.number }} of {{ page.paginator.num_pages }}</span></li>
+    {% if page.has_next %}<li class="page-item"><a class="page-link" href="?show={{ show }}&page={{ page.next_page_number }}">Next</a></li>{% endif %}
+  </ul></nav>
+  {% endif %}
+</div>
+{% endblock %}

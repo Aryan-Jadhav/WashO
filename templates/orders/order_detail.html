@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% load money order_tags %}
+{% block title %}Order {{ order.code }}{% endblock %}
+
+{% block content %}
+<div class="container py-5" style="max-width: 1040px;">
+  <a href="{% url 'orders:list' %}" class="small"><i class="bi bi-arrow-left"></i> My orders</a>
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mt-2 mb-4">
+    <h2 class="mb-0">Order {{ order.code }} {% if order.is_express %}<span class="badge text-bg-warning fs-6"><i class="bi bi-lightning-charge-fill"></i> Express</span>{% endif %}</h2>
+    <span class="text-muted small">Booked {{ order.created_at|date:"d M Y, g:i A" }}</span>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-7">
+      {% include "orders/_order_status.html" %}
+
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-4">
+          <h5 class="mb-3">Items {% if not order.bill_finalised %}<span class="small text-muted fw-normal">(approximate counts from booking)</span>{% endif %}</h5>
+          <div class="table-responsive">
+            <table class="table table-sm align-middle mb-0">
+              <thead class="table-light"><tr><th>Item</th><th class="text-center">Qty</th><th class="text-end">Rate</th><th class="text-end">Amount</th></tr></thead>
+              <tbody>
+                {% for i in order.items.all %}
+                <tr>
+                  <td>{{ i.item.name }}<div class="small text-muted">{{ i.category.name }}</div></td>
+                  <td class="text-center">{{ i.quantity }}</td>
+                  <td class="text-end">{{ i.unit_price|rupees }}{% if i.express_surcharge %}<div class="small text-warning">+{{ i.express_surcharge|rupees }} express</div>{% endif %}</td>
+                  <td class="text-end">{{ i.line_total|rupees }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-5">
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-4">
+          <h5 class="mb-3">{% if order.bill_finalised %}Final bill{% else %}Estimated bill{% endif %}</h5>
+          <dl class="row small mb-0">
+            <dt class="col-7 fw-normal">Items</dt><dd class="col-5 text-end mb-1">{{ order.subtotal|rupees }}</dd>
+            {% if order.express_charge %}<dt class="col-7 fw-normal">Express charge</dt><dd class="col-5 text-end mb-1">{{ order.express_charge|rupees }}</dd>{% endif %}
+            {% if order.discount %}<dt class="col-7 fw-normal text-success">Coupon {{ order.coupon.code }}</dt><dd class="col-5 text-end text-success mb-1">−{{ order.discount|rupees }}</dd>{% endif %}
+            <dt class="col-7 fw-normal">Pickup &amp; delivery</dt><dd class="col-5 text-end text-success mb-1">Free</dd>
+            <dt class="col-7 fs-5 pt-2 border-top">Total</dt><dd class="col-5 text-end fs-5 fw-bold pt-2 border-top mb-0">{{ order.total|rupees }}</dd>
+          </dl>
+          {% if not order.bill_finalised %}
+            <p class="small text-muted mt-3 mb-0"><i class="bi bi-info-circle"></i> The final bill is made at the store from the garments actually received.</p>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-4 small">
+          <h5 class="mb-3">Pickup details</h5>
+          <p class="mb-2"><i class="bi bi-calendar-event me-2 text-primary"></i>{{ order.pickup_slot.date|date:"l, d M Y" }}, {{ order.pickup_slot.time_slot }}</p>
+          <p class="mb-2"><i class="bi bi-geo-alt me-2 text-primary"></i>{{ order.address_snapshot }}</p>
+          <p class="mb-2"><i class="bi bi-shop me-2 text-primary"></i>{{ order.store.name }} · {{ order.store.phone }}</p>
+          {% if order.customer_note %}<p class="mb-0"><i class="bi bi-chat-left-text me-2 text-primary"></i>{{ order.customer_note }}</p>{% endif %}
+        </div>
+      </div>
+
+      {% if order.can_cancel %}
+      <div class="card border-0 shadow-sm">
+        <div class="card-body p-4">
+          <button class="btn btn-outline-danger btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#cancelBox">
+            <i class="bi bi-x-circle me-1"></i>Cancel this order
+          </button>
+          <div class="collapse mt-3" id="cancelBox">
+            <form method="post" action="{% url 'orders:cancel' order.code %}">
+              {% csrf_token %}
+              {% include "partials/_form.html" with form=cancel_form %}
+              <button type="submit" class="btn btn-danger btn-sm">Yes, cancel order</button>
+            </form>
+          </div>
+          <p class="small text-muted mt-2 mb-0">You can cancel until our agent picks up your clothes.</p>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
