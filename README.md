@@ -58,7 +58,7 @@ Either:
 4. **Double-click `setup.bat` again.** It checks the database connection and creates all the
    tables. It finishes with **"Setup complete"**.
 
-### 6. Create your admin login and start the website
+### 6. Create your admin login
 Open PowerShell in the `WashO` folder: in File Explorer, click the address bar, type
 `powershell` and press Enter. Then run:
 
@@ -68,10 +68,26 @@ venv\Scripts\python manage.py createsuperuser
 Enter a 10-digit mobile number (for example `9999999999`) and a password. This is your admin
 login.
 
+### 7. Start WashO (every day)
+**Double-click `start.bat`** in the WashO folder. It:
+1. checks that PostgreSQL is running, and tells you how to start it if not,
+2. applies any new database changes,
+3. starts the website and **opens it in your browser** automatically.
+
+The black window says **"WashO is running. Close this window to stop it."** Keep it open while
+you use the website, and close it when you're done.
+
+**Optional: Desktop shortcut.** Double-click `create_shortcut.bat` once. A **WashO** icon appears
+on your Desktop. From then on, just double-click that icon to start WashO.
+
+<details><summary>Starting it by hand instead (advanced)</summary>
+
 ```
 venv\Scripts\python manage.py runserver
 ```
-Open **<http://127.0.0.1:8000>** in a browser. To stop the server, press **Ctrl + C**.
+Then open <http://127.0.0.1:8000> yourself. Stop with **Ctrl + C**.
+</details>
+
 The admin site is at <http://127.0.0.1:8000/admin/>.
 
 > `migrate` (run by setup.bat) also loads the master data automatically: the 4 roles, FAQs,
@@ -88,7 +104,8 @@ Run these from the `WashO` folder:
 
 | What | Command |
 |---|---|
-| Start the website | `venv\Scripts\python manage.py runserver` |
+| Start the website | Double-click `start.bat` (or the **WashO** Desktop shortcut) |
+| Create the Desktop shortcut (once) | Double-click `create_shortcut.bat` |
 | Run all automatic tests | `venv\Scripts\python manage.py test` |
 | Check the database connection | `venv\Scripts\python scripts\check_db.py` |
 | Apply new database changes (after pulling new code) | `venv\Scripts\python manage.py migrate` |
@@ -109,6 +126,8 @@ Tip: running `setup.bat` again does all of the "after new code" steps for you.
 | `connection refused` / `could not connect to server` | PostgreSQL isn't running. Open **Services** (Win + R → `services.msc`), find **postgresql-x64-18** and click **Start**. |
 | `Can create tables in schema public: NO` | In SQL Shell (as postgres): `ALTER DATABASE washo OWNER TO washo_user;` |
 | `Can create databases (for tests): NO` | In SQL Shell (as postgres): `ALTER ROLE washo_user CREATEDB;` |
+| start.bat says **"WashO already seems to be running"** | Another WashO window is already open. Use that one, or close it and start again. |
+| start.bat says **"Can't connect to the PostgreSQL database"** | Start the PostgreSQL service (see `connection refused` above). |
 | `psql` is not recognised | Use **SQL Shell (psql)** from the Start menu, or add `C:\Program Files\PostgreSQL\18\bin` to PATH. |
 | Page looks unstyled (no colours) | Bootstrap loads from the internet; check your connection. |
 
@@ -126,7 +145,9 @@ WashO/
 ├── templates/      HTML templates (base layout + one folder per app)
 ├── static/         CSS and images
 ├── scripts/        Helper scripts used by setup.bat
-├── setup.bat       One-click setup for Windows
+├── setup.bat       One-click setup for Windows (run once per computer)
+├── start.bat       Double-click to start WashO every day
+├── create_shortcut.bat  Puts a WashO shortcut on the Desktop
 ├── requirements.txt  Exact package versions
 └── .env.example    Template for the .env settings file
 ```

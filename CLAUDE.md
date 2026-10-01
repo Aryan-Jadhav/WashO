@@ -74,6 +74,9 @@ The project must also run on a second Windows laptop. Before finishing ANY phase
 - `.env.example` — every setting the code reads via `config(...)`, with placeholders, no real secrets.
 - `setup.bat` — checks Python 3.12–3.14, creates venv, installs requirements, creates `.env`,
   checks DB, migrates. Add new one-time steps here (Phase 8: `seed_demo`). Keep CRLF line endings.
+- `start.bat` — daily launcher: checks venv/.env, port 8000 free, DB reachable, `migrate --noinput`,
+  opens browser via `scripts/open_browser.py`, runs server; pauses on any error. Add new start-time
+  steps here. `create_shortcut.bat` makes the Desktop shortcut. Test with `WASHO_NO_BROWSER=1`.
 - `README.md` — "Run on a new computer" section in simple steps (incl. creating the DB + user).
 Verify `setup.bat` still works on a fresh copy (no `venv`, no `.env`) when it changes.
 

@@ -97,8 +97,8 @@ echo.
 echo ============ Setup complete ============
 echo  Next steps:
 echo    1. Create your admin login (once):  venv\Scripts\python manage.py createsuperuser
-echo    2. Start the website:              venv\Scripts\python manage.py runserver
-echo    3. Open http://127.0.0.1:8000 in your browser.
+echo    2. Start WashO: double-click start.bat (it opens your browser by itself)
+echo    3. Optional: double-click create_shortcut.bat for a WashO icon on the Desktop.
 echo.
 pause
 exit /b 0
