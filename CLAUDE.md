@@ -52,6 +52,16 @@ and code must carry short WHY-comments that help in the viva.
 - Git: small meaningful commits, imperative messages (e.g. "Add store locator with pincode search").
 - Timezone `Asia/Kolkata`; demo data is Pune-based.
 
+## 3a. Portability rule (MANDATORY every phase)
+The project must also run on a second Windows laptop. Before finishing ANY phase, update:
+- `requirements.txt` — exact pinned versions (`==`) of every installed package, incl. dependencies
+  (check with `venv\Scripts\python -m pip freeze`).
+- `.env.example` — every setting the code reads via `config(...)`, with placeholders, no real secrets.
+- `setup.bat` — checks Python 3.12–3.14, creates venv, installs requirements, creates `.env`,
+  checks DB, migrates. Add new one-time steps here (Phase 8: `seed_demo`). Keep CRLF line endings.
+- `README.md` — "Run on a new computer" section in simple steps (incl. creating the DB + user).
+Verify `setup.bat` still works on a fresh copy (no `venv`, no `.env`) when it changes.
+
 ## 4. Key design decisions (agreed assumptions)
 - At booking the customer gives *approximate* item counts → system shows an **estimated** total.
   The **final bill** is computed from the actual tagged garments at the store.
