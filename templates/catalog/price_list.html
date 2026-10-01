@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Price list{% endblock %}
+{% block meta_description %}WashO price list: per-item prices for laundry, wash & iron, dry cleaning, shoe cleaning and home textiles in Pune.{% endblock %}
+
+{% block content %}
+<section class="page-header py-5">
+  <div class="container">
+    <h1 class="fw-bold">Price list</h1>
+    <p class="lead mb-0">Simple per-item pricing. Free pickup and delivery.</p>
+  </div>
+</section>
+
+<section class="py-4">
+  <div class="container">
+    {# Works as a normal GET form; HTMX upgrades it to live search without reloading the page. #}
+    <form method="get" action="{% url 'catalog:price_list' %}" class="row g-2 align-items-end mb-4"
+          hx-get="{% url 'catalog:price_list' %}" hx-target="#price-results" hx-push-url="true"
+          hx-trigger="input changed delay:300ms from:#id_q, change from:#id_category, submit">
+      <div class="col-sm-5 col-lg-4">
+        <label class="form-label" for="id_category">Service</label>
+        {{ form.category }}
+      </div>
+      <div class="col-sm-5 col-lg-4">
+        <label class="form-label" for="id_q">Search item</label>
+        {{ form.q }}
+      </div>
+      <div class="col-sm-2 col-lg-2 d-grid">
+        <button type="submit" class="btn btn-primary"><i class="bi bi-search me-1"></i>Search</button>
+      </div>
+    </form>
+
+    <div id="price-results">
+      {% include "catalog/_price_results.html" %}
+    </div>
+
+    <div class="alert alert-light border small mt-4 mb-0">
+      <i class="bi bi-info-circle me-1"></i>
+      When you book, you'll see an <strong>estimated</strong> total. The final bill is made from the garments our
+      store actually receives and tags, using these prices.
+    </div>
+  </div>
+</section>
+{% endblock %}
