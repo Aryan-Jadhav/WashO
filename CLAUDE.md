@@ -70,7 +70,13 @@ and code must carry short WHY-comments that help in the viva.
   Admin sees all. Counts via `tagging.services.record_count` (pickup → store → delivery; each compared with
   the previous; mismatch → `MismatchAlert` + email to admins on commit). `finish_tagging` records the store
   count, calls `finalise_bill` (garment prices; booked price reused for booked items) and moves to Tagged.
-  Pickup count UI arrives in Phase 5; until then it can be entered in Django admin → Count checks.
+  Counts can also be entered in Django admin → Count checks (goes through record_count).
+- Delivery (`delivery` app, agent URLs under /agent/, assignment POSTs used by the staff panel):
+  `Order.pickup_agent/delivery_agent/delivery_date`. `change_status` refuses Pickup Assigned / Out for Delivery
+  without the agent. `delivery.services`: `assign_pickup_agent` (Booked→Pickup Assigned; agent must be an active
+  Delivery Agent of the order's store), `assign_delivery_agent` (Ready only), `confirm_pickup` (pickup count →
+  Picked Up), `start_delivery` (→ Out for Delivery), `confirm_delivery` (delivery count, mismatch needs confirm →
+  Delivered). `agent_jobs(agent, day)` includes overdue jobs. Tests: give orders an agent before moving them.
 - Address chosen from served `ServiceArea`s; `Order.address_snapshot` keeps the address as on booking day.
 
 ## 3a. Portability rule (MANDATORY every phase)
@@ -119,7 +125,7 @@ Verify `setup.bat` still works on a fresh copy (no `venv`, no `.env`) when it ch
 
 ## 6. Status
 - [x] Phase 0  - [x] Phase 1  - [x] Phase 2  - [x] Phase 3  - [x] Phase 4
-- [ ] Phase 5  - [ ] Phase 6  - [ ] Phase 7  - [ ] Phase 8  - [ ] Phase 9
+- [x] Phase 5  - [ ] Phase 6  - [ ] Phase 7  - [ ] Phase 8  - [ ] Phase 9
 
 ## 7. Common commands (filled in as we go)
 ```

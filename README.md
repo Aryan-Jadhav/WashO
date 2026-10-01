@@ -144,6 +144,7 @@ WashO/
 ├── stores/         Cities, stores, service areas (pincodes), store locator
 ├── orders/         Booking, pickup slots + capacity, coupons, orders, status history (PL/pgSQL trigger)
 ├── tagging/        Staff panel: garment tagging + QR codes, damage photos, counts, mismatch alerts
+├── delivery/       Agent panel (My jobs): pickups & deliveries with garment counts; agent assignment
 ├── media/          Uploaded photos (created automatically, not in Git)
 ├── templates/      HTML templates (base layout + one folder per app)
 ├── static/         CSS and images
