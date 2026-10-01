@@ -1,0 +1,33 @@
+{% load static %}
+<footer class="site-footer mt-5 pt-5 pb-4">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-md-5">
+        <div class="d-flex align-items-center gap-2 mb-2">
+          <img src="{% static 'img/logo-mark.svg' %}" alt="" width="30" height="30">
+          <span class="brand-text text-white">Wash<span class="text-accent">O</span></span>
+        </div>
+        <p class="small mb-0">Doorstep laundry and dry cleaning in Pune. Every garment is tagged, counted and tracked from pickup to delivery.</p>
+      </div>
+      <div class="col-6 col-md-3">
+        <h6 class="text-white">Quick links</h6>
+        <ul class="list-unstyled small">
+          <li><a href="{% url 'core:services' %}">Services</a></li>
+          <li><a href="{% url 'core:about' %}">About us</a></li>
+          <li><a href="{% url 'core:faq' %}">FAQ</a></li>
+          <li><a href="{% url 'core:contact' %}">Contact</a></li>
+        </ul>
+      </div>
+      <div class="col-6 col-md-4">
+        <h6 class="text-white">Reach us</h6>
+        <ul class="list-unstyled small">
+          <li><i class="bi bi-telephone me-2"></i>{{ SUPPORT_PHONE }}</li>
+          <li><i class="bi bi-envelope me-2"></i>{{ SUPPORT_EMAIL }}</li>
+          <li><i class="bi bi-clock me-2"></i>Mon–Sun, 8 AM – 9 PM</li>
+        </ul>
+      </div>
+    </div>
+    <hr class="border-secondary">
+    <p class="small text-center mb-0">&copy; {% now "Y" %} {{ SITE_NAME }}. A T.Y. B.Sc. (Computer Science) academic project.</p>
+  </div>
+</footer>

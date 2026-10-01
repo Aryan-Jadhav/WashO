@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}FAQ{% endblock %}
+
+{% block content %}
+<section class="page-header py-5">
+  <div class="container">
+    <h1 class="fw-bold">Frequently asked questions</h1>
+    <p class="lead mb-0">Can't find your answer? <a class="link-light" href="{% url 'core:contact' %}">Contact us</a>.</p>
+  </div>
+</section>
+
+<section class="py-5">
+  <div class="container" style="max-width: 860px;">
+    {% if faqs %}
+    <div class="accordion" id="faqAccordion">
+      {% for f in faqs %}
+      <div class="accordion-item">
+        <h2 class="accordion-header">
+          <button class="accordion-button {% if not forloop.first %}collapsed{% endif %}" type="button"
+                  data-bs-toggle="collapse" data-bs-target="#faq{{ f.pk }}"
+                  aria-expanded="{% if forloop.first %}true{% else %}false{% endif %}" aria-controls="faq{{ f.pk }}">
+            {{ f.question }}
+          </button>
+        </h2>
+        <div id="faq{{ f.pk }}" class="accordion-collapse collapse {% if forloop.first %}show{% endif %}" data-bs-parent="#faqAccordion">
+          <div class="accordion-body">{{ f.answer|linebreaksbr }}</div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+      <p class="text-muted">No FAQs yet.</p>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

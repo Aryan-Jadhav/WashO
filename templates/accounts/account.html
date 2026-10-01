@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}My account{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row g-4">
+    <div class="col-lg-4">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body p-4 text-center">
+          <div class="avatar mx-auto mb-3">{{ user.first_name|first|default:"U"|upper }}</div>
+          <h4 class="mb-0">{{ user.get_full_name|default:"—" }}</h4>
+          <span class="badge text-bg-primary mt-2">{{ user.role|default:"No role assigned" }}</span>
+          <ul class="list-unstyled text-start small mt-4 mb-4">
+            <li class="py-1"><i class="bi bi-phone me-2 text-primary"></i>{{ user.phone }}</li>
+            <li class="py-1"><i class="bi bi-envelope me-2 text-primary"></i>{{ user.email|default:"No email added" }}</li>
+            <li class="py-1"><i class="bi bi-calendar me-2 text-primary"></i>Member since {{ user.date_joined|date:"d M Y" }}</li>
+          </ul>
+          <div class="d-grid gap-2">
+            <a href="{% url 'accounts:profile_edit' %}" class="btn btn-outline-primary btn-sm"><i class="bi bi-pencil me-1"></i>Edit profile</a>
+            <a href="{% url 'accounts:password_change' %}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-key me-1"></i>Change password</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-8">
+      <h3 class="mb-3">Hello, {{ user.first_name|default:"there" }} 👋</h3>
+
+      {# Each role sees its own shortcuts. The real panels arrive in later phases. #}
+      {% if user.is_admin_role %}
+        <div class="card border-0 shadow-sm mb-3"><div class="card-body">
+          <h5><i class="bi bi-shield-lock me-2 text-primary"></i>Admin</h5>
+          <p class="text-muted small">Manage master data (users, roles, FAQs, contact messages) in the admin site. The dashboard with charts comes in Phase 7.</p>
+          <a href="{% url 'admin:index' %}" class="btn btn-primary btn-sm">Open admin site</a>
+        </div></div>
+      {% endif %}
+      {% if user.is_store_staff %}
+        <div class="card border-0 shadow-sm mb-3"><div class="card-body">
+          <h5><i class="bi bi-shop me-2 text-primary"></i>Store staff panel</h5>
+          <p class="text-muted small mb-0">Incoming orders and the garment tagging screen will appear here (Phase 4).</p>
+        </div></div>
+      {% endif %}
+      {% if user.is_delivery_agent %}
+        <div class="card border-0 shadow-sm mb-3"><div class="card-body">
+          <h5><i class="bi bi-truck me-2 text-primary"></i>Delivery agent panel</h5>
+          <p class="text-muted small mb-0">Today's pickups and deliveries will appear here (Phase 5).</p>
+        </div></div>
+      {% endif %}
+      {% if user.is_customer %}
+        <div class="row g-3">
+          <div class="col-sm-6"><div class="card border-0 shadow-sm h-100"><div class="card-body">
+            <h5><i class="bi bi-calendar-plus me-2 text-primary"></i>Book a pickup</h5>
+            <p class="text-muted small mb-0">Coming in Phase 3.</p>
+          </div></div></div>
+          <div class="col-sm-6"><div class="card border-0 shadow-sm h-100"><div class="card-body">
+            <h5><i class="bi bi-bag me-2 text-primary"></i>My orders</h5>
+            <p class="text-muted small mb-0">Your order history and live status. Coming in Phase 3.</p>
+          </div></div></div>
+          <div class="col-sm-6"><div class="card border-0 shadow-sm h-100"><div class="card-body">
+            <h5><i class="bi bi-geo-alt me-2 text-primary"></i>Address book</h5>
+            <p class="text-muted small mb-0">Saved pickup addresses. Coming in Phase 3.</p>
+          </div></div></div>
+          <div class="col-sm-6"><div class="card border-0 shadow-sm h-100"><div class="card-body">
+            <h5><i class="bi bi-headset me-2 text-primary"></i>Support</h5>
+            <p class="text-muted small mb-0">Raise a complaint about an order. Coming in Phase 7.</p>
+          </div></div></div>
+        </div>
+      {% endif %}
+      {% if not user.role %}
+        <div class="alert alert-warning">Your account has no role yet. Please ask the admin to assign one.</div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

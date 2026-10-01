@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Contact us{% endblock %}
+
+{% block content %}
+<section class="page-header py-5">
+  <div class="container">
+    <h1 class="fw-bold">Contact us</h1>
+    <p class="lead mb-0">Questions, feedback or business enquiries: we're happy to help.</p>
+  </div>
+</section>
+
+<section class="py-5">
+  <div class="container">
+    <div class="row g-5">
+      <div class="col-lg-7">
+        <div class="card border-0 shadow-sm">
+          <div class="card-body p-4">
+            <h4 class="mb-3">Send us a message</h4>
+            {# novalidate: skip browser checks so the server-side validation is visible in demos #}
+            <form method="post" novalidate>
+              {% csrf_token %}
+              {% include "partials/_form.html" %}
+              <button type="submit" class="btn btn-primary px-4"><i class="bi bi-send me-2"></i>Send message</button>
+            </form>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-5">
+        <h5>Customer support</h5>
+        <p class="mb-1"><i class="bi bi-telephone me-2 text-primary"></i>{{ SUPPORT_PHONE }}</p>
+        <p class="mb-1"><i class="bi bi-envelope me-2 text-primary"></i>{{ SUPPORT_EMAIL }}</p>
+        <p><i class="bi bi-clock me-2 text-primary"></i>Mon–Sun, 8 AM – 9 PM</p>
+        <div class="alert alert-light border small">
+          <i class="bi bi-info-circle me-1"></i>
+          Have a problem with an order? Log in and raise a complaint from your order page. It reaches the right team faster.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

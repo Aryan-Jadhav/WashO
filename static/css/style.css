@@ -1,0 +1,59 @@
+/* WashO theme — small overrides on top of Bootstrap 5. */
+:root {
+  --wo-primary: #0d6efd;
+  --wo-deep: #0a3d91;
+  --wo-accent: #14b8a6;
+  --wo-soft: #f3f7fd;
+  --bs-primary: var(--wo-primary);
+  --bs-body-font-family: "Poppins", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+body { background: #fff; color: #1f2937; }
+
+.brand-text { font-weight: 700; font-size: 1.4rem; letter-spacing: -0.5px; color: var(--wo-deep); }
+.text-accent { color: var(--wo-accent) !important; }
+.bg-soft { background: var(--wo-soft); }
+
+.navbar .nav-link.active { color: var(--wo-primary); font-weight: 600; }
+
+/* Hero & page headers use a CSS gradient instead of photos (no copyrighted images). */
+.hero, .page-header, .cta {
+  background: linear-gradient(135deg, var(--wo-deep) 0%, var(--wo-primary) 60%, var(--wo-accent) 130%);
+  color: #fff;
+}
+.hero .lead, .page-header .lead { color: rgba(255, 255, 255, .85); }
+.hero-card { border-radius: 1rem; color: #1f2937; }
+.count-box { background: var(--wo-soft); border-radius: .5rem; padding: .5rem; }
+
+.section-title { font-weight: 700; color: var(--wo-deep); }
+
+.step-icon {
+  width: 72px; height: 72px; margin: 0 auto; border-radius: 50%;
+  display: grid; place-items: center; font-size: 1.8rem;
+  background: var(--wo-soft); color: var(--wo-primary);
+}
+
+.service-card { border-radius: 1rem; transition: transform .15s ease, box-shadow .15s ease; }
+.service-card:hover { transform: translateY(-4px); box-shadow: 0 .75rem 1.5rem rgba(13, 110, 253, .12) !important; }
+
+.feature { display: flex; gap: 1rem; }
+.feature > i { font-size: 1.8rem; color: var(--wo-accent); }
+
+.stat-box { background: var(--wo-soft); border-radius: 1rem; padding: 1.5rem .5rem; }
+.stat-num { font-size: 2rem; font-weight: 700; color: var(--wo-primary); }
+
+.avatar {
+  width: 72px; height: 72px; border-radius: 50%;
+  display: grid; place-items: center; font-size: 1.8rem; font-weight: 600;
+  background: var(--wo-primary); color: #fff;
+}
+
+.card { border-radius: 1rem; }
+
+.site-footer { background: #0b1b33; color: #9fb0c8; }
+.site-footer a { color: #9fb0c8; text-decoration: none; }
+.site-footer a:hover { color: #fff; }
+
+@media (max-width: 575.98px) {
+  .display-5 { font-size: 2rem; }
+}

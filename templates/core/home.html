@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% block title %}Doorstep Laundry & Dry Cleaning in Pune{% endblock %}
+
+{% block content %}
+<!-- Hero -->
+<section class="hero py-5">
+  <div class="container py-lg-4">
+    <div class="row align-items-center g-5">
+      <div class="col-lg-6">
+        <span class="badge rounded-pill text-bg-light text-primary mb-3"><i class="bi bi-qr-code me-1"></i>Every garment tagged &amp; tracked</span>
+        <h1 class="display-5 fw-bold mb-3">Fresh clothes, delivered.<br><span class="text-accent">Nothing goes missing.</span></h1>
+        <p class="lead mb-4">Book a free pickup in under a minute. We wash, dry clean and iron your clothes, then bring them back to your door, counted and checked at every step.</p>
+        <div class="d-flex flex-wrap gap-2">
+          {% if user.is_authenticated %}
+            <a href="{% url 'accounts:account' %}" class="btn btn-light btn-lg px-4"><i class="bi bi-calendar-plus me-2"></i>Book a pickup</a>
+          {% else %}
+            <a href="{% url 'accounts:register' %}" class="btn btn-light btn-lg px-4"><i class="bi bi-calendar-plus me-2"></i>Book a pickup</a>
+          {% endif %}
+          <a href="{% url 'core:services' %}" class="btn btn-outline-light btn-lg px-4">See services</a>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="hero-card card border-0 shadow-lg">
+          <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <span class="fw-semibold">Order #WO-2045</span>
+              <span class="badge text-bg-info">In Cleaning</span>
+            </div>
+            <ul class="list-unstyled small mb-3">
+              <li class="d-flex justify-content-between py-1 border-bottom"><span><i class="bi bi-qr-code me-2"></i>WO2045-01 · Shirt</span><span class="text-success">Tagged</span></li>
+              <li class="d-flex justify-content-between py-1 border-bottom"><span><i class="bi bi-qr-code me-2"></i>WO2045-02 · Saree</span><span class="text-success">Tagged</span></li>
+              <li class="d-flex justify-content-between py-1"><span><i class="bi bi-qr-code me-2"></i>WO2045-03 · Blanket</span><span class="text-success">Tagged</span></li>
+            </ul>
+            <div class="row text-center g-2 small">
+              <div class="col-4"><div class="count-box">Pickup<br><strong>3</strong></div></div>
+              <div class="col-4"><div class="count-box">Store<br><strong>3</strong></div></div>
+              <div class="col-4"><div class="count-box">Delivery<br><strong>–</strong></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- How it works -->
+<section class="py-5">
+  <div class="container">
+    <h2 class="section-title text-center">How it works</h2>
+    <div class="row g-4 mt-2 text-center">
+      <div class="col-6 col-lg-3">
+        <div class="step-icon"><i class="bi bi-calendar-check"></i></div>
+        <h5 class="mt-3">1. Book</h5>
+        <p class="text-muted small">Choose services, a date and a pickup time slot that suits you.</p>
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="step-icon"><i class="bi bi-truck"></i></div>
+        <h5 class="mt-3">2. Pickup</h5>
+        <p class="text-muted small">Our agent collects your clothes and counts them with you.</p>
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="step-icon"><i class="bi bi-qr-code-scan"></i></div>
+        <h5 class="mt-3">3. Tag &amp; clean</h5>
+        <p class="text-muted small">Each garment gets its own QR tag at the store before cleaning.</p>
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="step-icon"><i class="bi bi-house-check"></i></div>
+        <h5 class="mt-3">4. Delivered</h5>
+        <p class="text-muted small">Fresh clothes at your door, counted again before handover.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Services preview -->
+<section class="py-5 bg-soft">
+  <div class="container">
+    <h2 class="section-title text-center">Our services</h2>
+    <div class="row g-4 mt-2">
+      {% for s in services %}
+      <div class="col-sm-6 col-lg-4">
+        <div class="card h-100 border-0 shadow-sm service-card">
+          <div class="card-body">
+            <i class="bi bi-{{ s.icon }} fs-2 text-primary"></i>
+            <h5 class="mt-3">{{ s.name }}</h5>
+            <p class="text-muted small mb-0">{{ s.text }}</p>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- Why WashO -->
+<section class="py-5">
+  <div class="container">
+    <h2 class="section-title text-center">Why WashO?</h2>
+    <div class="row g-4 mt-2">
+      <div class="col-md-4"><div class="feature"><i class="bi bi-shield-check"></i><div><h6>3-point garment count</h6><p class="small text-muted mb-0">We count your clothes at pickup, at the store and at delivery. If the numbers don't match, our admin team is alerted straight away.</p></div></div></div>
+      <div class="col-md-4"><div class="feature"><i class="bi bi-broadcast"></i><div><h6>Live order status</h6><p class="small text-muted mb-0">Follow your order from booking to delivery, with the time of every step.</p></div></div></div>
+      <div class="col-md-4"><div class="feature"><i class="bi bi-currency-rupee"></i><div><h6>Clear per-item pricing</h6><p class="small text-muted mb-0">No surprises. Pay online or cash on delivery, and download a PDF invoice.</p></div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="py-5">
+  <div class="container">
+    <div class="cta rounded-4 p-4 p-lg-5 text-center text-white">
+      <h3 class="fw-bold">Ready for your first pickup?</h3>
+      <p class="mb-4">Sign up with your mobile number. It takes less than a minute.</p>
+      <a href="{% url 'accounts:register' %}" class="btn btn-light btn-lg px-4">Create free account</a>
+    </div>
+  </div>
+</section>
+{% endblock %}
