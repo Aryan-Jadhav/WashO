@@ -65,6 +65,12 @@ and code must carry short WHY-comments that help in the viva.
 - Billing: `Order.estimated_total` frozen at booking; `subtotal/express_charge/discount/total` = current bill
   (estimate until Phase 4 tagging recomputes from garments and sets `bill_finalised`). Coupon discount is
   recalculated on the final amount (0 if it falls below `min_order_value`). DB CHECK: total = subtotal + express - discount.
+- Tagging (`tagging` app, URLs under /staff/): `Garment` per piece, `tag_code` = `<order code>-NN`, QR (inline SVG)
+  encodes the staff lookup URL. Staff/agents linked to a store via `User.store`; staff see only their store,
+  Admin sees all. Counts via `tagging.services.record_count` (pickup → store → delivery; each compared with
+  the previous; mismatch → `MismatchAlert` + email to admins on commit). `finish_tagging` records the store
+  count, calls `finalise_bill` (garment prices; booked price reused for booked items) and moves to Tagged.
+  Pickup count UI arrives in Phase 5; until then it can be entered in Django admin → Count checks.
 - Address chosen from served `ServiceArea`s; `Order.address_snapshot` keeps the address as on booking day.
 
 ## 3a. Portability rule (MANDATORY every phase)
@@ -75,7 +81,8 @@ The project must also run on a second Windows laptop. Before finishing ANY phase
 - `setup.bat` — checks Python 3.12–3.14, creates venv, installs requirements, creates `.env`,
   checks DB, migrates. Add new one-time steps here (Phase 8: `seed_demo`). Keep CRLF line endings.
 - `start.bat` — daily launcher: checks venv/.env, port 8000 free, DB reachable, `migrate --noinput`,
-  opens browser via `scripts/open_browser.py`, runs server; pauses on any error. Add new start-time
+  `pip install -r requirements.txt` (quiet; offline-safe when nothing new), opens browser via
+  `scripts/open_browser.py`, runs server; pauses on any error. Add new start-time
   steps here. `create_shortcut.bat` makes the Desktop shortcut. Test with `WASHO_NO_BROWSER=1`.
 - `README.md` — "Run on a new computer" section in simple steps (incl. creating the DB + user).
 Verify `setup.bat` still works on a fresh copy (no `venv`, no `.env`) when it changes.
@@ -111,7 +118,7 @@ Verify `setup.bat` still works on a fresh copy (no `venv`, no `.env`) when it ch
   all diagrams, data dictionary, test case table, screenshot list, viva prep (40 Q&A).
 
 ## 6. Status
-- [x] Phase 0  - [x] Phase 1  - [x] Phase 2  - [x] Phase 3  - [ ] Phase 4
+- [x] Phase 0  - [x] Phase 1  - [x] Phase 2  - [x] Phase 3  - [x] Phase 4
 - [ ] Phase 5  - [ ] Phase 6  - [ ] Phase 7  - [ ] Phase 8  - [ ] Phase 9
 
 ## 7. Common commands (filled in as we go)

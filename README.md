@@ -71,8 +71,9 @@ login.
 ### 7. Start WashO (every day)
 **Double-click `start.bat`** in the WashO folder. It:
 1. checks that PostgreSQL is running, and tells you how to start it if not,
-2. applies any new database changes,
-3. starts the website and **opens it in your browser** automatically.
+2. installs any new Python packages (only needs internet when something was added),
+3. applies any new database changes,
+4. starts the website and **opens it in your browser** automatically.
 
 The black window says **"WashO is running. Close this window to stop it."** Keep it open while
 you use the website, and close it when you're done.
@@ -142,6 +143,8 @@ WashO/
 ├── catalog/        Service categories, items, per-item prices, express surcharge, price list
 ├── stores/         Cities, stores, service areas (pincodes), store locator
 ├── orders/         Booking, pickup slots + capacity, coupons, orders, status history (PL/pgSQL trigger)
+├── tagging/        Staff panel: garment tagging + QR codes, damage photos, counts, mismatch alerts
+├── media/          Uploaded photos (created automatically, not in Git)
 ├── templates/      HTML templates (base layout + one folder per app)
 ├── static/         CSS and images
 ├── scripts/        Helper scripts used by setup.bat
@@ -156,6 +159,6 @@ WashO/
 | Role | How the account is created |
 |---|---|
 | Customer | Signs up on the website |
-| Store Staff | Admin creates the user and picks the **Store Staff** group |
-| Delivery Agent | Admin creates the user and picks the **Delivery Agent** group |
+| Store Staff | Admin creates the user, picks the **Store Staff** group and sets **Works at** (store) |
+| Delivery Agent | Admin creates the user, picks the **Delivery Agent** group and sets **Works at** (store) |
 | Admin | `manage.py createsuperuser` |
