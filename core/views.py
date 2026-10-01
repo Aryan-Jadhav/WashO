@@ -1,28 +1,28 @@
 from django.conf import settings
 from django.contrib import messages
 from django.core.mail import send_mail
+from django.db.models import Min, Q
 from django.shortcuts import redirect, render
+
+from catalog.models import ServiceCategory
 
 from .forms import ContactForm
 from .models import FAQ
 
-# Service categories shown on the public pages. In Phase 2 these come from the database.
-SERVICE_HIGHLIGHTS = [
-    {"icon": "basket", "name": "Laundry", "text": "Everyday wash for your regular clothes, charged by the item."},
-    {"icon": "layers", "name": "Wash & Fold", "text": "Washed, dried and neatly folded, ready for the cupboard."},
-    {"icon": "fire", "name": "Wash & Iron", "text": "Washed and steam-ironed, ready for office or college."},
-    {"icon": "stars", "name": "Dry Clean", "text": "Gentle solvent cleaning for sarees, suits, silk and woollens."},
-    {"icon": "bag-check", "name": "Shoe Cleaning", "text": "Deep cleaning for sneakers, sports and leather shoes."},
-    {"icon": "house-heart", "name": "Home Textiles", "text": "Curtains, carpets, blankets and sofa covers."},
-]
+
+def categories_with_starting_price():
+    """Active categories plus their lowest active price ("starting from ₹X"), in one query."""
+    return ServiceCategory.objects.filter(is_active=True).annotate(
+        starting_price=Min("prices__price", filter=Q(prices__is_active=True, prices__item__is_active=True))
+    )
 
 
 def home(request):
-    return render(request, "core/home.html", {"services": SERVICE_HIGHLIGHTS})
+    return render(request, "core/home.html", {"services": categories_with_starting_price()})
 
 
 def services(request):
-    return render(request, "core/services.html", {"services": SERVICE_HIGHLIGHTS})
+    return render(request, "core/services.html", {"services": categories_with_starting_price()})
 
 
 def about(request):

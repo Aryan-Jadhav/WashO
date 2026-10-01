@@ -19,6 +19,8 @@ urlpatterns = [
     ),
     path("logout/", auth_views.LogoutView.as_view(), name="logout"),  # POST only (safer)
     path("account/", include("accounts.urls")),
+    path("prices/", include("catalog.urls")),
+    path("stores/", include("stores.urls")),
     path("", include("core.urls")),
 ]
 

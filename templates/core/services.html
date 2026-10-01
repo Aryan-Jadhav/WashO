@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load money %}
 {% block title %}Services{% endblock %}
 
 {% block content %}
@@ -18,16 +19,28 @@
           <div class="card-body p-4">
             <i class="bi bi-{{ s.icon }} fs-1 text-primary"></i>
             <h4 class="mt-3">{{ s.name }}</h4>
-            <p class="text-muted">{{ s.text }}</p>
+            <p class="text-muted">{{ s.description }}</p>
+            <ul class="list-unstyled small mb-0">
+              {% if s.starting_price %}<li class="mb-1"><i class="bi bi-tag me-2 text-primary"></i>From <strong>{{ s.starting_price|rupees }}</strong></li>{% endif %}
+              <li class="mb-1"><i class="bi bi-clock me-2 text-primary"></i>Ready in {{ s.standard_turnaround_hours }} hours</li>
+              {% if s.express_available %}
+                <li><i class="bi bi-lightning-charge-fill me-2 text-warning"></i>Express in {{ s.express_turnaround_hours }} hours (+{{ s.express_surcharge_percent|floatformat:"-2" }}%)</li>
+              {% endif %}
+            </ul>
+          </div>
+          <div class="card-footer bg-white border-0 px-4 pb-4">
+            <a href="{% url 'catalog:price_list' %}?category={{ s.slug }}" class="btn btn-outline-primary btn-sm">View prices</a>
           </div>
         </div>
       </div>
+      {% empty %}
+        <p class="text-muted">No services available right now.</p>
       {% endfor %}
     </div>
 
     <div class="alert alert-info mt-5 d-flex gap-3 align-items-start">
       <i class="bi bi-lightning-charge-fill fs-4"></i>
-      <div><strong>Express service:</strong> need it fast? Choose Express when booking and get your clothes back sooner, for a small extra charge.</div>
+      <div><strong>Express service:</strong> need it fast? Choose Express when booking to get your clothes back sooner, for a small extra charge on that service.</div>
     </div>
   </div>
 </section>

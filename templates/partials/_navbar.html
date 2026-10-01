@@ -15,6 +15,8 @@
       <ul class="navbar-nav me-auto ms-lg-4">
         <li class="nav-item"><a class="nav-link {% if url == 'home' %}active{% endif %}" href="{% url 'core:home' %}">Home</a></li>
         <li class="nav-item"><a class="nav-link {% if url == 'services' %}active{% endif %}" href="{% url 'core:services' %}">Services</a></li>
+        <li class="nav-item"><a class="nav-link {% if url == 'price_list' %}active{% endif %}" href="{% url 'catalog:price_list' %}">Prices</a></li>
+        <li class="nav-item"><a class="nav-link {% if url == 'locator' %}active{% endif %}" href="{% url 'stores:locator' %}">Stores</a></li>
         <li class="nav-item"><a class="nav-link {% if url == 'about' %}active{% endif %}" href="{% url 'core:about' %}">About</a></li>
         <li class="nav-item"><a class="nav-link {% if url == 'faq' %}active{% endif %}" href="{% url 'core:faq' %}">FAQ</a></li>
         <li class="nav-item"><a class="nav-link {% if url == 'contact' %}active{% endif %}" href="{% url 'core:contact' %}">Contact</a></li>
