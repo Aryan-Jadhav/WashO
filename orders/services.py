@@ -11,6 +11,7 @@ from django.db.models import F
 from django.utils import timezone
 
 from .models import Coupon, DailySlot, Order, OrderItem, TimeSlot
+from .notifications import send_order_email
 from .pricing import build_quote
 
 S = Order.Status
@@ -143,6 +144,8 @@ def change_status(order, new_status, by, note=""):
 
     if new_status == S.CANCELLED:
         release_slot(order.pickup_slot)  # give the pickup place back to other customers
+    # Email the customer only after the change is safely saved (and never twice if it rolls back).
+    transaction.on_commit(lambda pk=order.pk, st=new_status: send_order_email(pk, st))
     return order
 
 
@@ -202,5 +205,6 @@ def create_order(*, customer, address, pickup_date, time_slot, selected_items, i
     ])
     order.code = f"WO-{order.pk:06d}"
     order.save(update_fields=["code"])
+    transaction.on_commit(lambda pk=order.pk: send_order_email(pk, S.BOOKED))
     return order
 

@@ -1,0 +1,9 @@
+Hello {{ customer.first_name|default:"there" }},
+
+{{ headline }}: order {{ order.code }}
+{{ message }}
+
+Track your order: {{ order_url }}
+
+Thank you for choosing WashO.
+- Team WashO, {{ order.store.name }} ({{ order.store.phone }})
