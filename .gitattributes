@@ -1,2 +1,10 @@
 # Windows batch files must keep CRLF line endings or cmd.exe can misread them.
 *.bat text eol=crlf
+
+# Binary files: never touch their bytes (line-ending conversion would corrupt them).
+*.pdf binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.svg binary
+*.ico binary
